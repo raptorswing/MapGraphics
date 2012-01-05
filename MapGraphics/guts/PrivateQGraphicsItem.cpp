@@ -22,6 +22,8 @@ void PrivateQGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIt
     painter->save();
     this->user->paint(painter,option,widget);
     painter->restore();
+
+
     if (option->state & QStyle::State_Selected)
     {
         const qreal penWidth = 0; // cosmetic pen
@@ -34,7 +36,7 @@ void PrivateQGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIt
 
         painter->setPen(QPen(bgcolor, penWidth, Qt::SolidLine));
         painter->setBrush(Qt::NoBrush);
-        const qreal pad = 0.2;
+        const qreal pad = 0.0;
         painter->drawRect(this->boundingRect().adjusted(-pad, -pad, pad, pad));
 
         painter->setPen(QPen(option->palette.windowText(), penWidth, Qt::DashLine));
