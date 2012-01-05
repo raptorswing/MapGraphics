@@ -58,7 +58,7 @@ void MapGraphicsItem::setPos(const QPointF &globalPos)
     QPointF scenePos = mapTileSource->scenePixelFromCoordinate(globalPos,zoomLevel);
     this->qGraphicsItem()->setPos(scenePos);
 
-    //This needs to be generalized
+    //This needs to be generalized to different map tile sources with possible different tiles sizes
     if (!this->useStaticSize())
         this->qGraphicsItem()->setScale(pow(2.0,zoomLevel));
 }
@@ -166,6 +166,23 @@ QVariant MapGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, c
             this->globalPos = tileSource->coordinateFromScenePixel(graphicsScenePixel,this->scene()->getZoomLevel());
     }
     return value;
+}
+
+QPointF MapGraphicsItem::mapFromScene(const QPointF &point) const
+{
+    //We take a point in geographic coordinates. Need to map it to regular scene coordinates
+    QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
+    QPoint scenePixel = tileSource->scenePixelFromCoordinate(point,this->scene()->getZoomLevel());
+
+    //Now we need to map that to our item-space coordinates
+    QPointF itemPos = this->graphicsItem->mapFromScene(scenePixel);
+
+    return itemPos;
+}
+
+void MapGraphicsItem::update()
+{
+    this->graphicsItem->update();
 }
 
 //private

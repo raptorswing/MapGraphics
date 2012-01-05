@@ -59,6 +59,10 @@ public:
     //pure-virtual from PrivateQGraphicsItemParent
     virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value);
 
+    QPointF mapFromScene(const QPointF& point) const;
+
+    void update();
+
 private:
     void addChild(MapGraphicsItem * child);
 
