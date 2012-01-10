@@ -56,7 +56,14 @@ void MapGraphicsItem::setPos(const QPointF &globalPos)
 
     QSharedPointer<MapTileSource> mapTileSource = MapInfoManager::getInstance()->getMapTileSource();
     QPointF scenePos = mapTileSource->scenePixelFromCoordinate(globalPos,zoomLevel);
+
     this->qGraphicsItem()->setPos(scenePos);
+    /*
+      itemChange is called as a result of QGraphicsItem::SetPos, even though we don't need it here.
+      As a result, the code does a scene->geo conversion and sets globalPos again as if we were dragging
+      with the mouse. This causes zooming far in/out to make items drift. The following line corrects this.
+    */
+    this->globalPos = globalPos;
 
     //This needs to be generalized to different map tile sources with possible different tiles sizes
     if (!this->useStaticSize())
@@ -163,7 +170,10 @@ QVariant MapGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, c
         QPointF graphicsScenePixel = value.toPointF();
         QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
         if (!tileSource.isNull())
+        {
             this->globalPos = tileSource->coordinateFromScenePixel(graphicsScenePixel,this->scene()->getZoomLevel());
+            qDebug() << "Changed:" << this->globalPos;
+        }
     }
     return value;
 }

@@ -165,7 +165,9 @@ void MapGraphicsScene::updateItemsForZoomChange()
         //QGraphicsItem * key = iter.key();
         MapGraphicsItem * value = iter.value();
 
+        qDebug() << "In:" << value->pos();
         value->setPos(value->pos());
+        qDebug() << "Out:" << value->pos();
     }
 }
 
