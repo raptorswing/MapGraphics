@@ -44,7 +44,7 @@ void MGNetworkManager::setCachingEnabled(bool enable)
     {
         //QNetworkAccessManager takes ownership of the cache object and will delete it
         QNetworkDiskCache * cache = new QNetworkDiskCache();
-        cache->setCacheDirectory(QDir::homePath() + "/.MapGraphicsCache");
+        cache->setCacheDirectory(QDir::homePath() + "/.MapGraphicsNetCache");
         this->manager->setCache(cache);
     }
     else
