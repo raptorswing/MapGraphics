@@ -1,5 +1,5 @@
 See the wiki on the GitHub page for an overview.
-( https://github.com/vomitpony/MapGraphics/wiki )
+( https://github.com/raptorswing/MapGraphics/wiki )
 
 
 To build, use QtCreator on any platform or use qmake and your C++ compiler of choice. The project should build on most platforms and compilers, provided that you've got the Qt libraries
