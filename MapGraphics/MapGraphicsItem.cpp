@@ -11,7 +11,7 @@
 
 
 MapGraphicsItem::MapGraphicsItem(MapGraphicsItem * parent) :
-    myScene(0), boolUseStaticSize(false)
+    boolUseStaticSize(false), myScene(0)
 {
     this->graphicsItem = new PrivateQGraphicsItem(this);
     this->graphicsItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemSendsScenePositionChanges);

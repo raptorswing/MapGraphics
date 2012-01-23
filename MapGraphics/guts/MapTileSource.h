@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QPixmap>
+#include <QImage>
 #include <QCache>
 #include <QDir>
 #include <QMutex>
@@ -28,7 +29,7 @@ public:
 
     virtual QString getFileExtension() const=0;
 
-    QPixmap * retrieveFinishedRequest(quint16 x, quint16 y, quint16 z);
+    QImage * retrieveFinishedRequest(quint16 x, quint16 y, quint16 z);
 
     //quint32 getNextRequestID();
 
@@ -39,14 +40,14 @@ protected:
                                          quint16 y,
                                          quint16 z)=0;
 
-    void notifyClientOfRetrieval(quint16 x, quint16 y, quint16 z, QPixmap * tile);
+    void notifyClientOfRetrieval(quint16 x, quint16 y, quint16 z, QImage * tile);
 
     virtual bool isCachingOkay() const=0;
 
-    virtual bool isTileValid(const QPixmap * pixmap) const=0;
+    virtual bool isTileValid(const QImage * pixmap) const=0;
 
-    QPixmap * fromMemCache(quint16 x, quint16 y, quint16 z);
-    QPixmap * fromDiskCache(quint16 x, quint16 y, quint16 z);
+    QImage * fromMemCache(quint16 x, quint16 y, quint16 z);
+    QImage * fromDiskCache(quint16 x, quint16 y, quint16 z);
 
     static QString createCacheID(quint16 x, quint16 y, quint16 z);
     static bool cacheID2xyz(const QString &, quint16 * x, quint16 * y, quint16 * z);
@@ -65,15 +66,18 @@ signals:
 private:
     QDir getDiskCacheDirectory(quint16 x, quint16 y, quint16 z) const;
     QString getDiskCacheFile(quint16 x, quint16 y, quint16 z) const;
-    void insertIntoMemCache(quint16 x, quint16 y, quint16 z, QPixmap * pixmap);
-    void insertIntoDiskCache(quint16 x, quint16 y, quint16 z, QPixmap * pixmap);
+    void insertIntoMemCache(quint16 x, quint16 y, quint16 z, QImage * pixmap);
+    void insertIntoDiskCache(quint16 x, quint16 y, quint16 z, QImage * pixmap);
 
-    //Maps cacheID to a pixmap that a client is waiting for. Temporary.
-    QCache<QString, QPixmap> tempCache;
+    /*
+      Maps cacheID to an image that a client is waiting for. Temporary in nature.
+      Kept just long enough for the person who requested the tile to grab it
+    */
+    QCache<QString, QImage> tempCache;
     QMutex * tempCacheLock;
 
     //A persistent in-memory cache
-    QCache<QString, QPixmap> memoryCache;
+    QCache<QString, QImage> memoryCache;
 
 };
 

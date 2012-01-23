@@ -51,7 +51,7 @@ protected:
                                          quint16 z);
 
     //from MapTileSource
-    virtual bool isTileValid(const QPixmap *pixmap) const;
+    virtual bool isTileValid(const QImage *image) const;
 
     //from MapTileSource
     virtual bool isCachingOkay() const;

@@ -83,9 +83,23 @@ void MapTileGraphicsItem::handleTileRetrieved(quint16 x, quint16 y, quint16 z)
 
     QSharedPointer<MapTileSource>  tileSource = MapInfoManager::getInstance()->getMapTileSource();
 
-    QPixmap * tile = tileSource->retrieveFinishedRequest(x,y,z);
+    /*
+      Retrieve the image tile that has been retrieved.
+      This passes ownership of the image to us. We are responsible for deleting it.
+    */
+    QImage * image = tileSource->retrieveFinishedRequest(x,y,z);
+
+    //Convert the image to a pixmap
+    QPixmap * tile = new QPixmap();
+    *tile = QPixmap::fromImage(*image);
+
+    //Delete the image
+    delete image;
+    image = 0;
+
     if (this->tile != 0)
         qDebug() << "Should be null";
+
     this->tile = tile;
     this->update();
 

@@ -11,6 +11,10 @@ MapTileSource::MapTileSource()
     this->tempCacheLock = new QMutex();
     this->memoryCache.setMaxCost(20);
 
+    /*
+      We do this because MapTileSource runs in its own thread.
+      It's a way to communicate from the GUI thread to the MapTileSource thread
+    */
     connect(this,
             SIGNAL(tileRequested(quint16,quint16,quint16)),
             this,
@@ -32,7 +36,7 @@ void MapTileSource::fetchTile(quint16 x, quint16 y, quint16 z)
     //Do Caching here
     if (this->isCachingOkay())
     {
-        QPixmap * cached = this->fromMemCache(x,y,z);
+        QImage * cached = this->fromMemCache(x,y,z);
         if (!cached)
         {
             cached = this->fromDiskCache(x,y,z);
@@ -49,7 +53,7 @@ void MapTileSource::fetchTile(quint16 x, quint16 y, quint16 z)
     this->asynchronousTileRequest(x,y,z);
 }
 
-QPixmap * MapTileSource::retrieveFinishedRequest(quint16 x, quint16 y, quint16 z)
+QImage * MapTileSource::retrieveFinishedRequest(quint16 x, quint16 y, quint16 z)
 {
     const QString cacheID = this->createCacheID(x,y,z);
     QMutexLocker lock(this->tempCacheLock);
@@ -62,7 +66,7 @@ QPixmap * MapTileSource::retrieveFinishedRequest(quint16 x, quint16 y, quint16 z
 }
 
 //protected
-void MapTileSource::notifyClientOfRetrieval(quint16 x, quint16 y, quint16 z, QPixmap *tile)
+void MapTileSource::notifyClientOfRetrieval(quint16 x, quint16 y, quint16 z, QImage *tile)
 {
     //If there's something wrong with the tile (corruption, etc) we throw it out.
     //This can happen sometimes with weird network things
@@ -81,20 +85,20 @@ void MapTileSource::notifyClientOfRetrieval(quint16 x, quint16 y, quint16 z, QPi
 }
 
 //protected
-QPixmap * MapTileSource::fromMemCache(quint16 x, quint16 y, quint16 z)
+QImage * MapTileSource::fromMemCache(quint16 x, quint16 y, quint16 z)
 {
     const QString cacheID = MapTileSource::createCacheID(x,y,z);
-    QPixmap * toRet = 0;
+    QImage * toRet = 0;
 
-    QPixmap * inCache = this->memoryCache.object(cacheID);
+    QImage * inCache = this->memoryCache.object(cacheID);
     if (inCache)
-        toRet = new QPixmap(*inCache);
+        toRet = new QImage(*inCache);
 
     return toRet;
 }
 
 //protected
-QPixmap * MapTileSource::fromDiskCache(quint16 x, quint16 y, quint16 z)
+QImage * MapTileSource::fromDiskCache(quint16 x, quint16 y, quint16 z)
 {
     QFile fp(this->getDiskCacheFile(x,y,z));
     if (!fp.exists())
@@ -119,7 +123,7 @@ QPixmap * MapTileSource::fromDiskCache(quint16 x, quint16 y, quint16 z)
         }
     }
 
-    QPixmap * pixmap = new QPixmap();
+    QImage * pixmap = new QImage();
     if (!pixmap->loadFromData(data))
     {
         delete pixmap;
@@ -180,7 +184,7 @@ QString MapTileSource::getDiskCacheFile(quint16 x, quint16 y, quint16 z) const
 }
 
 //private
-void MapTileSource::insertIntoMemCache(quint16 x, quint16 y, quint16 z, QPixmap * pixmap)
+void MapTileSource::insertIntoMemCache(quint16 x, quint16 y, quint16 z, QImage * pixmap)
 {
     const QString cacheID = MapTileSource::createCacheID(x,y,z);
 
@@ -188,13 +192,13 @@ void MapTileSource::insertIntoMemCache(quint16 x, quint16 y, quint16 z, QPixmap 
     if (this->memoryCache.contains(cacheID))
         return;
 
-    QPixmap * copy = new QPixmap(*pixmap);
+    QImage * copy = new QImage(*pixmap);
     this->memoryCache.insert(cacheID,
                              copy);
 }
 
 //private
-void MapTileSource::insertIntoDiskCache(quint16 x, quint16 y, quint16 z, QPixmap * pixmap)
+void MapTileSource::insertIntoDiskCache(quint16 x, quint16 y, quint16 z, QImage *pixmap)
 {
     const QString filePath = this->getDiskCacheFile(x,y,z);
 

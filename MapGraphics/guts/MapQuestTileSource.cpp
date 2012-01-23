@@ -106,14 +106,13 @@ QString MapQuestTileSource::getFileExtension() const
 }
 
 //protected
-bool MapQuestTileSource::isTileValid(const QPixmap *pixmap) const
+bool MapQuestTileSource::isTileValid(const QImage *image) const
 {
-    if (pixmap == 0)
+    if (image == 0)
         return false;
-    QImage image = pixmap->toImage();
 
     //If all colors are shades of gray (red, green, blue components equal), we assume bad image
-    return !image.allGray();
+    return !image->allGray();
 }
 
 //protected
@@ -161,15 +160,16 @@ void MapQuestTileSource::handleNetworkRequestFinished()
         return;
 
     QByteArray bytes = reply->readAll();
-    QPixmap * pixmap = new QPixmap();
+    QImage * image = new QImage();
 
-    if (!pixmap->loadFromData(bytes))
+
+    if (!image->loadFromData(bytes))
     {
-        delete pixmap;
+        delete image;
         return;
     }
     //Add to the "fake" temporary cache that the MapTileGraphicsItems pull from
-    this->notifyClientOfRetrieval(x,y,z,pixmap);
+    this->notifyClientOfRetrieval(x,y,z,image);
 }
 
 //private static

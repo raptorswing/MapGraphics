@@ -22,6 +22,7 @@ void MapInfoManager::setMapTileSource(QSharedPointer<MapTileSource> newSource)
 {
     this->mapTileSource = newSource;
 
+
     MapTileSource * rawSource = newSource.data();
     QThread * thread = new QThread();
     QObject::connect(rawSource,
@@ -34,7 +35,6 @@ void MapInfoManager::setMapTileSource(QSharedPointer<MapTileSource> newSource)
             SLOT(deleteLater()));
     rawSource->moveToThread(thread);
     thread->start();
-
 }
 
 QSharedPointer<MapTileSource> MapInfoManager::getMapTileSource() const
