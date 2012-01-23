@@ -99,7 +99,7 @@ void MapTileGraphicsItem::handleTileRetrieved(quint16 x, quint16 y, quint16 z)
     if (image == 0)
     {
         qDebug() << "failed to get tile" << x << y << z;
-
+        return;
     }
 
     //Convert the image to a pixmap
