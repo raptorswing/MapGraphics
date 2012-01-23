@@ -75,10 +75,13 @@ void MapTileGraphicsItem::setTileRequestInfo(quint16 x, quint16 y, quint16 z)
 
 void MapTileGraphicsItem::handleTileRetrieved(quint16 x, quint16 y, quint16 z)
 {
+    //If we don't care about retrieved tiles (i.e., we haven't requested a tile), return
     if (!this->havePendingRequest)
         return;
+    //If the tile that we're being shown isn't the one we've requested, return
     else if (this->tileX != x || this->tileY != y || this->tileZoom != z)
         return;
+    //This is the right tile for us --- we're no longer in the market
     this->havePendingRequest = false;
 
     QSharedPointer<MapTileSource>  tileSource = MapInfoManager::getInstance()->getMapTileSource();
@@ -89,6 +92,16 @@ void MapTileGraphicsItem::handleTileRetrieved(quint16 x, quint16 y, quint16 z)
     */
     QImage * image = tileSource->retrieveFinishedRequest(x,y,z);
 
+    /*
+      Make sure we successfully retrieved the tile. It's possible that someone else could have
+      already snatched the tile from us
+    */
+    if (image == 0)
+    {
+        qDebug() << this << "failed to get tile" << x << y << z;
+
+    }
+
     //Convert the image to a pixmap
     QPixmap * tile = new QPixmap();
     *tile = QPixmap::fromImage(*image);
@@ -97,15 +110,16 @@ void MapTileGraphicsItem::handleTileRetrieved(quint16 x, quint16 y, quint16 z)
     delete image;
     image = 0;
 
+    //When a request is sent for a new tile, the old tile should be deleted and set to null
     if (this->tile != 0)
-        qDebug() << "Should be null";
+        qDebug() << "Tile should be null, but isn't";
 
     this->tile = tile;
     this->update();
 
     /*
       We disconnect so that a tile that isn't awaiting an update doesn't have to filter
-      through a bunch of updates. Whether connectin and disconnecting repeatedly is
+      through a bunch of updates. Whether connecting and disconnecting repeatedly is
       cheaper than just sorting through extraneous updates remains to be seen.
       */
     QObject::disconnect(tileSource.data(),
