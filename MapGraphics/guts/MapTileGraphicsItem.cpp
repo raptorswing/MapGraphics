@@ -98,7 +98,7 @@ void MapTileGraphicsItem::handleTileRetrieved(quint16 x, quint16 y, quint16 z)
     */
     if (image == 0)
     {
-        qDebug() << this << "failed to get tile" << x << y << z;
+        qDebug() << "failed to get tile" << x << y << z;
 
     }
 
