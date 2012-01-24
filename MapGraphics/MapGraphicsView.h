@@ -10,6 +10,7 @@
 #include "guts/MapGraphicsScene.h"
 #include "MapGraphicsItem.h"
 #include "CompassWidget.h"
+#include "ZoomWidget.h"
 
 
 namespace Ui {
@@ -27,6 +28,12 @@ public:
         IgnoreEdges,
         ScrollNearEdges,
         ScrollNearAndBeyondEdges
+    };
+
+    enum ZoomCenterMode
+    {
+        PreserveCenter,
+        FollowMouse
     };
 
 //Function zone
@@ -54,6 +61,9 @@ public:
 
 public slots:
     void rotate(qreal angle);
+    void zoomIn(ZoomCenterMode mode);
+    void zoomOut(ZoomCenterMode mode);
+    void setZoom(int level,ZoomCenterMode mode = PreserveCenter);
 
 signals:
     void geometryChanged(QRect);
@@ -76,6 +86,7 @@ private:
     QPointer<MapGraphicsScene> mapGraphicsScene;
 
     CompassWidget * compassWidget;
+    ZoomWidget * zoomWidget;
 
     EdgeMouseMode currentEdgeMouseMode;
     QTimer * edgeMouseDetectionTimer;

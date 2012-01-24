@@ -18,7 +18,6 @@ protected:
     void mouseReleaseEvent(QMouseEvent *);
     void enterEvent(QEvent *);
     void leaveEvent(QEvent *);
-    void resizeEvent(QResizeEvent *);
 
 signals:
     void rotationChanged(qreal angle);

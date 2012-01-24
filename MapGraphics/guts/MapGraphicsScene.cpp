@@ -28,34 +28,6 @@ quint8 MapGraphicsScene::getZoomLevel() const
     return this->zoomLevel;
 }
 
-void MapGraphicsScene::setZoomLevel(quint8 nZoom)
-{
-    if (nZoom == this->zoomLevel)
-        return;
-    this->zoomLevel = nZoom;
-
-    //This is stuff that we should factor out into specific map settings classes
-    this->tilesOnZoomLevel = pow(4.0,this->zoomLevel);
-    this->tilesPerRow = sqrt((long double)this->tilesOnZoomLevel);
-    this->tilesPerCol = this->tilesPerRow;
-    this->tileSize = 256;
-
-    //Also, it's possible for tiles to not be square, so we should generalize that
-    //We could use projections besides mercator
-    this->scene()->setSceneRect(0,0,
-                                this->tilesPerRow*this->tileSize,
-                                this->tilesPerCol*this->tileSize);
-
-    foreach(MapTileGraphicsItem * item,this->tileDisplays)
-    {
-        item->setVisible(false);
-        //item->setPos(-5000,-5000);
-    }
-
-    //Update the positions of all our items
-    this->updateItemsForZoomChange();
-}
-
 void MapGraphicsScene::addItem(MapGraphicsItem *item)
 {
     this->mapGraphicsItems.insert(item,item->qGraphicsItem());
@@ -153,6 +125,39 @@ void MapGraphicsScene::setViewerPosition(QPointF centerPoint, QPolygonF viewport
         }
     }
 
+}
+
+//public slot
+void MapGraphicsScene::setZoomLevel(int nZoom)
+{
+    nZoom = qMax<int>(0,nZoom);
+
+    if (nZoom == this->zoomLevel)
+        return;
+    this->zoomLevel = nZoom;
+
+    //This is stuff that we should factor out into specific map settings classes
+    this->tilesOnZoomLevel = pow(4.0,this->zoomLevel);
+    this->tilesPerRow = sqrt((long double)this->tilesOnZoomLevel);
+    this->tilesPerCol = this->tilesPerRow;
+    this->tileSize = 256;
+
+    //Also, it's possible for tiles to not be square, so we should generalize that
+    //We could use projections besides mercator
+    this->scene()->setSceneRect(0,0,
+                                this->tilesPerRow*this->tileSize,
+                                this->tilesPerCol*this->tileSize);
+
+    foreach(MapTileGraphicsItem * item,this->tileDisplays)
+    {
+        item->setVisible(false);
+        //item->setPos(-5000,-5000);
+    }
+
+    //Update the positions of all our items
+    this->updateItemsForZoomChange();
+
+    this->zoomLevelChanged(nZoom);
 }
 
 //private slot

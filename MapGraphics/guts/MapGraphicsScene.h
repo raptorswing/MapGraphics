@@ -20,7 +20,6 @@ public:
     QGraphicsScene * scene() const;
 
     quint8 getZoomLevel() const;
-    void setZoomLevel(quint8 nZoom);
 
     void addItem(MapGraphicsItem * item);
 
@@ -41,9 +40,11 @@ protected:
 
 
 signals:
+    void zoomLevelChanged(int zoom);
 
 public slots:
     void setViewerPosition(QPointF centerPoint, QPolygonF viewport);
+    void setZoomLevel(int nZoom);
 
 private slots:
     void updateItemsForZoomChange();

@@ -175,19 +175,4 @@ void CompassWidget::leaveEvent(QEvent *)
     this->update();
 }
 
-//protected
-void CompassWidget::resizeEvent(QResizeEvent *)
-{
-    /*
-    int side = qMin(width(), height());
-    QRegion rect(0,0,width(),height());
-    QRegion masked(width() / 2 - (side-50) / 2,
-                   height() / 2 - (side-50) / 2,
-                   side-50,
-                   side-50, QRegion::Ellipse);
-    QRegion mask = rect - masked;
-    setMask(mask);
-    */
-}
-
 

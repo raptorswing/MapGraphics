@@ -22,7 +22,8 @@ SOURCES += guts/MGNetworkManager.cpp \
     MapGraphicsItem.cpp \
     CompassWidget.cpp \
     guts/PrivateQGraphicsItem.cpp \
-    guts/PrivateQGraphicsItemParent.cpp
+    guts/PrivateQGraphicsItemParent.cpp \
+    ZoomWidget.cpp
 
 HEADERS += guts/MGNetworkManager.h\
         guts/MapGraphics_global.h \
@@ -36,7 +37,8 @@ HEADERS += guts/MGNetworkManager.h\
     guts/MapQuestTileSource.h \
     CompassWidget.h \
     guts/PrivateQGraphicsItem.h \
-    guts/PrivateQGraphicsItemParent.h
+    guts/PrivateQGraphicsItemParent.h \
+    ZoomWidget.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

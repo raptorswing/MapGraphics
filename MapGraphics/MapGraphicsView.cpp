@@ -31,6 +31,8 @@ MapGraphicsView::MapGraphicsView(QWidget *parent) :
     qsrand(QDateTime::currentMSecsSinceEpoch());
     //this->rotate(qrand() % 360);
 
+
+    //Create compass widget
     this->compassWidget = new CompassWidget(this);
     //No title bar
     this->compassWidget->setWindowFlags(Qt::CustomizeWindowHint);
@@ -48,6 +50,18 @@ MapGraphicsView::MapGraphicsView(QWidget *parent) :
             SIGNAL(rotationChanged(qreal)),
             this,
             SLOT(rotate(qreal)));
+
+    //Create zoom widget
+    this->zoomWidget = new ZoomWidget(this);
+    this->zoomWidget->move(QPoint(50,125 + 10));
+    this->zoomWidget->show();
+    this->zoomWidget->setRange(0,17);
+    this->zoomWidget->setValue(0);
+
+    connect(this->zoomWidget,
+            SIGNAL(sliderMoved(int)),
+            this,
+            SLOT(setZoom(int)));
 }
 
 MapGraphicsView::~MapGraphicsView()
@@ -81,6 +95,14 @@ void MapGraphicsView::setScene(MapGraphicsScene *scene)
 {
     this->mapGraphicsScene = scene;
     this->qGraphicsView()->setScene(scene->scene());
+
+    if (this->zoomWidget != 0)
+    {
+        connect(scene,
+                SIGNAL(zoomLevelChanged(int)),
+                this->zoomWidget,
+                SLOT(setValue(int)));
+    }
 }
 
 MapGraphicsScene * MapGraphicsView::scene() const
@@ -89,10 +111,86 @@ MapGraphicsScene * MapGraphicsView::scene() const
 }
 
 
-
+//public slot
 void MapGraphicsView::rotate(qreal angle)
 {
     this->qGraphicsView()->rotate(angle);
+}
+
+//public slot
+void MapGraphicsView::zoomIn(MapGraphicsView::ZoomCenterMode mode)
+{
+    this->setZoom(this->scene()->getZoomLevel()+1,mode);
+}
+
+//public slot
+void MapGraphicsView::zoomOut(MapGraphicsView::ZoomCenterMode mode)
+{
+    this->setZoom(this->scene()->getZoomLevel()-1,mode);
+}
+
+//public slot
+void MapGraphicsView::setZoom(int level, MapGraphicsView::ZoomCenterMode mode)
+{
+    int oldZoom = this->scene()->getZoomLevel();
+    if (level == oldZoom)
+        return;
+
+    /*
+      Find out where the mouse was and store that information so we can re-center
+      after zooming in/out.
+    */
+    QPointF  centerGeoPos = this->mapToScene(QPoint(this->width()/2,this->height()/2));
+    QGraphicsView * view = this->qGraphicsView();
+    QPointF mousePoint = view->mapToScene(this->mapFromGlobal(QCursor::pos()));
+    QRectF sceneRect = view->sceneRect();
+    float xRatio = mousePoint.x() / sceneRect.width();
+    float yRatio = mousePoint.y() / sceneRect.height();
+    QPointF centerPos = view->mapToScene(QPoint(this->width()/2,this->height()/2));
+    QPointF offset = mousePoint - centerPos;
+
+    //Get the maximum and minimum zoom levels
+    QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
+    const int maxZoom = tileSource->getMaxZoomLevel();
+    const int minZoom = tileSource->getMinZoomLevel();
+
+
+
+    QTransform trans = this->qGraphicsView()->transform();
+
+    //Does "overzoom" if we're already zoomed in to our max zoom
+    if (oldZoom == maxZoom && trans.m11() < 10 && trans.m22() < 10 && oldZoom < level)
+    {
+        this->qGraphicsView()->scale((trans.m11() + 0.1)/trans.m11(),(trans.m22() + 0.1)/trans.m22());
+        return;
+    }
+    //Does zooming out of "overzoom"
+    else if (trans.m11() > 1 && trans.m22() > 1 && oldZoom > level)
+    {
+        this->qGraphicsView()->scale((trans.m11() - 0.1)/trans.m11(),(trans.m22() - 0.1)/trans.m22());
+        return;
+    }
+
+
+    quint8 newZoom = oldZoom;
+    if (level > oldZoom)
+        newZoom = qMin<quint8>(oldZoom + 1, maxZoom);
+    else if (oldZoom > minZoom)
+        newZoom = oldZoom - 1;
+
+    //The scene will do everything necessary with tiles to handle the zoom in/out
+    this->scene()->setZoomLevel(newZoom);
+
+    //Center on the same position as before the zoom change
+    sceneRect = view->sceneRect();
+    mousePoint = QPointF(sceneRect.width()*xRatio,
+                         sceneRect.height()*yRatio) - offset;
+    if (mode == FollowMouse)
+        view->centerOn(mousePoint);
+    else if (mode == PreserveCenter)
+        this->centerOn(centerGeoPos);
+
+    this->ensureStuffDisplayed();
 }
 
 QGraphicsView::DragMode MapGraphicsView::dragMode() const
@@ -190,56 +288,10 @@ void MapGraphicsView::on_graphicsView_hadResizeEvent(QResizeEvent *)
 //protected slot
 void MapGraphicsView::on_graphicsView_hadWheelEvent(QWheelEvent * event)
 {
-    /*
-      Find out where the mouse was and store that information so we can re-center
-      after zooming in/out.
-    */
-    QGraphicsView * view = this->qGraphicsView();
-    QPointF mousePoint = view->mapToScene(event->pos());
-    QRectF sceneRect = view->sceneRect();
-    float xRatio = mousePoint.x() / sceneRect.width();
-    float yRatio = mousePoint.y() / sceneRect.height();
-    QPointF offset = mousePoint - view->mapToScene(QPoint(this->width()/2,this->height()/2));
-
-    //Get the maximum and minimum zoom levels
-    QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
-    const quint8 maxZoom = tileSource->getMaxZoomLevel();
-    const quint8 minZoom = tileSource->getMinZoomLevel();
-
-    quint8 oldZoom = this->scene()->getZoomLevel();
-
-    QTransform trans = this->qGraphicsView()->transform();
-
-    //Does "overzoom" if we're already zoomed in to our max zoom
-    if (oldZoom == maxZoom && trans.m11() < 10 && trans.m22() < 10 && event->delta() > 0)
-    {
-        this->qGraphicsView()->scale((trans.m11() + 0.1)/trans.m11(),(trans.m22() + 0.1)/trans.m22());
-        return;
-    }
-    //Does zooming out of "overzoom"
-    else if (trans.m11() > 1 && trans.m22() > 1 && event->delta() < 0)
-    {
-        this->qGraphicsView()->scale((trans.m11() - 0.1)/trans.m11(),(trans.m22() - 0.1)/trans.m22());
-        return;
-    }
-
-
-    quint8 newZoom = oldZoom;
     if (event->delta() > 0)
-        newZoom = qMin<quint8>(oldZoom + 1, maxZoom);
-    else if (oldZoom > minZoom)
-        newZoom = oldZoom - 1;
-
-    //The scene will do everything necessary with tiles to handle the zoom in/out
-    this->scene()->setZoomLevel(newZoom);
-
-    //Center on the same position as before the zoom change
-    sceneRect = view->sceneRect();
-    mousePoint = QPointF(sceneRect.width()*xRatio,
-                         sceneRect.height()*yRatio) - offset;
-    view->centerOn(mousePoint);
-
-    this->ensureStuffDisplayed();
+        this->zoomIn(FollowMouse);
+    else
+        this->zoomOut(FollowMouse);
 }
 
 //private slot
