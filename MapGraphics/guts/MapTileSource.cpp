@@ -2,11 +2,15 @@
 
 #include <QtDebug>
 #include <QStringBuilder>
+#include <QFileInfo>
+#include <QDateTime>
 
 const QString MAPGRAPHICS_CACHE_FOLDER_NAME = ".MapGraphicsCache";
 const quint64 MAX_DISK_CACHE_READ_ATTEMPTS = 1000000;
+const quint32 DEFAULT_MAX_DISK_CACHE_AGE = 24 * 60 * 60; //seconds
 
-MapTileSource::MapTileSource()
+MapTileSource::MapTileSource() :
+    _maxDiskCacheTime(DEFAULT_MAX_DISK_CACHE_AGE)
 {
     this->tempCacheLock = new QMutex();
     this->memoryCache.setMaxCost(20);
@@ -65,6 +69,16 @@ QImage * MapTileSource::retrieveFinishedRequest(quint16 x, quint16 y, quint16 z)
     return this->tempCache.take(cacheID);
 }
 
+qint32 MapTileSource::maxDiskCacheTime() const
+{
+    return this->_maxDiskCacheTime;
+}
+
+void MapTileSource::setMaxDiskCacheTime(qint32 nTime)
+{
+    this->_maxDiskCacheTime = nTime;
+}
+
 //protected
 void MapTileSource::notifyClientOfRetrieval(quint16 x, quint16 y, quint16 z, QImage *tile)
 {
@@ -100,9 +114,19 @@ QImage * MapTileSource::fromMemCache(quint16 x, quint16 y, quint16 z)
 //protected
 QImage * MapTileSource::fromDiskCache(quint16 x, quint16 y, quint16 z)
 {
-    QFile fp(this->getDiskCacheFile(x,y,z));
+    const QString path = this->getDiskCacheFile(x,y,z);
+    QFile fp(path);
     if (!fp.exists())
         return 0;
+
+    //If the cached tile is older than we would like, throw it out
+    QFileInfo info(path);
+    if (info.lastModified().secsTo(QDateTime::currentDateTime()) >= this->_maxDiskCacheTime)
+    {
+        if (!QFile::remove(path))
+            qWarning() << "Failed to remove old cache file" << path;
+        return 0;
+    }
 
     if (!fp.open(QFile::ReadOnly))
     {
@@ -111,7 +135,6 @@ QImage * MapTileSource::fromDiskCache(quint16 x, quint16 y, quint16 z)
     }
 
     QByteArray data;
-
     quint64 counter = 0;
     while (data.length() < fp.size())
     {

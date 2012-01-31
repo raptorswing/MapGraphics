@@ -8,7 +8,9 @@
 #include <QDir>
 #include <QMutex>
 
-class MapTileSource : public QObject
+#include "MapGraphics_global.h"
+
+class MAPGRAPHICSSHARED_EXPORT MapTileSource : public QObject
 {
     Q_OBJECT
 public:
@@ -31,9 +33,9 @@ public:
 
     QImage * retrieveFinishedRequest(quint16 x, quint16 y, quint16 z);
 
-    //quint32 getNextRequestID();
+    qint32 maxDiskCacheTime() const;
 
-
+    void setMaxDiskCacheTime(qint32 nTime);
 
 protected:
     virtual bool asynchronousTileRequest(quint16 x,
@@ -78,6 +80,9 @@ private:
 
     //A persistent in-memory cache
     QCache<QString, QImage> memoryCache;
+
+    //The maximum time to keep a tile in disk cache before refreshing
+    qint32 _maxDiskCacheTime;
 
 };
 
