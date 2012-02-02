@@ -170,10 +170,7 @@ QVariant MapGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, c
         QPointF graphicsScenePixel = value.toPointF();
         QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
         if (!tileSource.isNull())
-        {
             this->globalPos = tileSource->coordinateFromScenePixel(graphicsScenePixel,this->scene()->getZoomLevel());
-            qDebug() << "Changed:" << this->globalPos;
-        }
     }
     return value;
 }
