@@ -5,6 +5,7 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QQueue>
 
 /**
  * @brief This is a singleton class that wraps a QNetworkAccessManager.
@@ -27,15 +28,15 @@ public:
      * @brief Given a QNetworkRequest, starts performing the request and returns a
      * QNetworkReply which can be used to learn about the status and results of the request
      * operation.
-     * The request will use caching if MGNetworkManager has been configured to do so (the default).
      *
      * @param request
      */
-    QNetworkReply * get(const QNetworkRequest & request);
+    QNetworkReply * get(QNetworkRequest &request);
 
     /**
      * @brief Configure whether or not you want network requests to be cached.
      * Requests are cached by default unless you explicitly disable them.
+     * You probably don't want this.
      *
      * @param enable
      */
@@ -47,12 +48,17 @@ public:
      */
     bool cachingEnabled() const;
 
+    void setUserAgent(const QByteArray& agent);
+    QByteArray userAgent() const;
+
 protected:
     MGNetworkManager();
 
 private:
     static MGNetworkManager * instance;
     QNetworkAccessManager * manager;
+
+    QByteArray _userAgent;
 
 };
 

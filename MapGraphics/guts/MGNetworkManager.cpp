@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QtDebug>
 
+const QByteArray DEFAULT_USER_AGENT = "MapGraphics";
 
 //static
 MGNetworkManager * MGNetworkManager::instance = 0;
@@ -24,6 +25,7 @@ MGNetworkManager::MGNetworkManager()
     //Don't enable caching by default
     this->setCachingEnabled(false);
 
+    this->setUserAgent(DEFAULT_USER_AGENT);
 }
 
 MGNetworkManager::~MGNetworkManager()
@@ -31,9 +33,11 @@ MGNetworkManager::~MGNetworkManager()
     this->manager->deleteLater();
 }
 
-QNetworkReply * MGNetworkManager::get(const QNetworkRequest &request)
+QNetworkReply * MGNetworkManager::get(QNetworkRequest &request)
 {
-    return this->manager->get(request);
+    request.setRawHeader("User-Agent",_userAgent);
+    QNetworkReply * toRet = this->manager->get(request);
+    return toRet;
 }
 
 void MGNetworkManager::setCachingEnabled(bool enable)
@@ -57,4 +61,14 @@ void MGNetworkManager::setCachingEnabled(bool enable)
 bool MGNetworkManager::cachingEnabled() const
 {
     return (this->manager->cache() != 0);
+}
+
+void MGNetworkManager::setUserAgent(const QByteArray &agent)
+{
+    _userAgent = agent;
+}
+
+QByteArray MGNetworkManager::userAgent() const
+{
+    return _userAgent;
 }
