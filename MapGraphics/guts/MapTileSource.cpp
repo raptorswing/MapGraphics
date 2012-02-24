@@ -7,7 +7,7 @@
 
 const QString MAPGRAPHICS_CACHE_FOLDER_NAME = ".MapGraphicsCache";
 const quint64 MAX_DISK_CACHE_READ_ATTEMPTS = 1000000;
-const quint32 DEFAULT_MAX_DISK_CACHE_AGE = 24 * 60 * 60; //seconds
+const quint32 DEFAULT_MAX_DISK_CACHE_AGE = 7 * 24 * 60 * 60; //Seven days in seconds
 
 MapTileSource::MapTileSource() :
     _maxDiskCacheTime(DEFAULT_MAX_DISK_CACHE_AGE)
@@ -33,6 +33,20 @@ MapTileSource::~MapTileSource()
 void MapTileSource::requestTile(quint16 x, quint16 y, quint16 z)
 {
     this->tileRequested(x,y,z);
+}
+
+QRectF MapTileSource::sceneRectFromGeoRect(const QRectF &latLonRect, quint8 zoomLevel) const
+{
+    QRectF toRet(this->scenePixelFromCoordinate(latLonRect.topLeft(),zoomLevel),
+                 this->scenePixelFromCoordinate(latLonRect.bottomRight(),zoomLevel));
+    return toRet;
+}
+
+QRectF MapTileSource::geoRectFromSceneRect(const QRectF &sceneRect, quint8 zoomLevel) const
+{
+    QRectF toRet(this->coordinateFromScenePixel(sceneRect.topLeft(),zoomLevel),
+                 this->coordinateFromScenePixel(sceneRect.bottomRight(),zoomLevel));
+    return toRet;
 }
 
 void MapTileSource::fetchTile(quint16 x, quint16 y, quint16 z)

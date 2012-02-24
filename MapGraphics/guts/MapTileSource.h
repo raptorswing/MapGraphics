@@ -22,6 +22,9 @@ public:
     virtual QPoint scenePixelFromCoordinate(const QPointF& latlon,quint8 zoomLevel) const=0;
     virtual QPointF coordinateFromScenePixel(const QPointF& point,quint8 zoomLevel) const=0;
 
+    QRectF sceneRectFromGeoRect(const QRectF &latLonRect, quint8 zoomLevel) const;
+    QRectF geoRectFromSceneRect(const QRectF& sceneRect, quint8 zoomLevel) const;
+
     virtual quint16 getTileSize() const=0;
 
     virtual quint8 getMinZoomLevel() const=0;
