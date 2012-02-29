@@ -43,10 +43,10 @@ bool MapQuestTileSource::asynchronousTileRequest(quint16 x,
 
     //Build the request
     const QString fetchURL = url.arg(QString::number(z),QString::number(x),QString::number(y));
-    const QNetworkRequest request(QUrl(host + fetchURL));
+    QNetworkRequest request(QUrl(host + fetchURL));
 
     //Send the request and make sure we're notified when it's finished
-    QNetworkReply * reply = netman->get(request);
+    QNetworkReply * reply = netman->get(&request);
     this->pendingReplies.insert(reply,cacheID);
 
     connect(reply,

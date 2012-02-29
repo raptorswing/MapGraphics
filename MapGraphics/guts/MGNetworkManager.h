@@ -31,7 +31,7 @@ public:
      *
      * @param request
      */
-    QNetworkReply * get(QNetworkRequest &request);
+    QNetworkReply * get(QNetworkRequest * request);
 
     /**
      * @brief Configure whether or not you want network requests to be cached.

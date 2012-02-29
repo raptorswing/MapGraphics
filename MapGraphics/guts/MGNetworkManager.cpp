@@ -33,10 +33,10 @@ MGNetworkManager::~MGNetworkManager()
     this->manager->deleteLater();
 }
 
-QNetworkReply * MGNetworkManager::get(QNetworkRequest &request)
+QNetworkReply * MGNetworkManager::get(QNetworkRequest *request)
 {
-    request.setRawHeader("User-Agent",_userAgent);
-    QNetworkReply * toRet = this->manager->get(request);
+    request->setRawHeader("User-Agent",_userAgent);
+    QNetworkReply * toRet = this->manager->get(*request);
     return toRet;
 }
 
