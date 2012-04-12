@@ -2,15 +2,19 @@
 
 #include <QtDebug>
 #include <QPainter>
+#include <QMutexLocker>
 
 CompositeTileSource::CompositeTileSource(QObject *parent) :
     MapTileSource(parent)
 {
+    _globalMutex = new QMutex(QMutex::Recursive);
     this->setCacheMode(MapTileSource::NoCaching);
 }
 
 CompositeTileSource::~CompositeTileSource()
 {
+    _globalMutex->lock();
+
     qDebug() << this << "destructing";
     //Clean up all data related to pending tiles
     QList<QMap<quint32, QImage *> * > pendingTiles = _pendingTiles.values();
@@ -25,10 +29,13 @@ CompositeTileSource::~CompositeTileSource()
 
     //Clear the sources
     _childSources.clear();
+
+    delete this->_globalMutex;
 }
 
 QPointF CompositeTileSource::ll2qgs(const QPointF &ll, quint8 zoomLevel) const
 {
+    QMutexLocker lock(_globalMutex);
     if (_childSources.isEmpty())
     {
         qWarning() << "Composite tile source is empty --- results undefined";
@@ -41,6 +48,7 @@ QPointF CompositeTileSource::ll2qgs(const QPointF &ll, quint8 zoomLevel) const
 
 QPointF CompositeTileSource::qgs2ll(const QPointF &qgs, quint8 zoomLevel) const
 {
+    QMutexLocker lock(_globalMutex);
     if (_childSources.isEmpty())
     {
         qWarning() << "Composite tile source is empty --- results undefined";
@@ -53,6 +61,7 @@ QPointF CompositeTileSource::qgs2ll(const QPointF &qgs, quint8 zoomLevel) const
 
 quint64 CompositeTileSource::tilesOnZoomLevel(quint8 zoomLevel) const
 {
+    QMutexLocker lock(_globalMutex);
     if (_childSources.isEmpty())
         return 1;
     else
@@ -61,6 +70,7 @@ quint64 CompositeTileSource::tilesOnZoomLevel(quint8 zoomLevel) const
 
 quint16 CompositeTileSource::tileSize() const
 {
+    QMutexLocker lock(_globalMutex);
     if (_childSources.isEmpty())
         return 256;
     else
@@ -69,6 +79,7 @@ quint16 CompositeTileSource::tileSize() const
 
 quint8 CompositeTileSource::minZoomLevel(QPointF ll)
 {
+    QMutexLocker lock(_globalMutex);
     //Return the highest minimum
     quint8 highest = 0;
 
@@ -83,6 +94,7 @@ quint8 CompositeTileSource::minZoomLevel(QPointF ll)
 
 quint8 CompositeTileSource::maxZoomLevel(QPointF ll)
 {
+    QMutexLocker lock(_globalMutex);
     //Return the lowest maximum
     quint8 lowest = 50;
 
@@ -107,6 +119,7 @@ QString CompositeTileSource::tileFileExtension() const
 
 void CompositeTileSource::addSourceTop(QSharedPointer<MapTileSource> source, qreal opacity)
 {
+    QMutexLocker lock(_globalMutex);
     if (source.isNull())
         return;
 
@@ -117,10 +130,13 @@ void CompositeTileSource::addSourceTop(QSharedPointer<MapTileSource> source, qre
             SIGNAL(tileRetrieved(quint32,quint32,quint8)),
             this,
             SLOT(handleTileRetrieved(quint32,quint32,quint8)));
+
+    this->sourcesChanged();
 }
 
 void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, qreal opacity)
 {
+    QMutexLocker lock(_globalMutex);
     if (source.isNull())
         return;
 
@@ -131,11 +147,29 @@ void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, 
             SIGNAL(tileRetrieved(quint32,quint32,quint8)),
             this,
             SLOT(handleTileRetrieved(quint32,quint32,quint8)));
+
+    this->sourcesChanged();
+}
+
+int CompositeTileSource::numSources() const
+{
+    QMutexLocker lock(_globalMutex);
+    return _childSources.size();
+}
+
+QSharedPointer<MapTileSource> CompositeTileSource::getSource(int index) const
+{
+    QMutexLocker lock(_globalMutex);
+    if (index < 0 || index >= _childSources.size())
+        return QSharedPointer<MapTileSource>();
+
+    return _childSources[index];
 }
 
 //protected
 void CompositeTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
 {
+    QMutexLocker lock(_globalMutex);
     //If we have no child sources, just print a message about that
     if (_childSources.isEmpty())
     {
@@ -166,6 +200,7 @@ void CompositeTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
 //private slot
 void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
 {
+    QMutexLocker lock(_globalMutex);
     QObject * sender = QObject::sender();
     MapTileSource * tileSource = qobject_cast<MapTileSource *>(sender);
 
