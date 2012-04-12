@@ -1,363 +1,365 @@
 #include "MapGraphicsView.h"
-#include "ui_MapGraphicsView.h"
 
-#include <QtDebug>
-#include <QWheelEvent>
+#include <QVBoxLayout>
 #include <QTimer>
-#include <QDateTime>
-#include <QPainter>
-#include <QMouseEvent>
-#include <QScrollBar>
-#include <QDockWidget>
+#include <QtDebug>
+#include <cmath>
+#include <QQueue>
+#include <QSet>
+#include <QWheelEvent>
 
+#include "guts/PrivateQGraphicsScene.h"
+#include "guts/PrivateQGraphicsView.h"
+#include "guts/Conversions.h"
 
-#include "guts/MapInfoManager.h"
-
-MapGraphicsView::MapGraphicsView(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::MapGraphicsView),
-    currentEdgeMouseMode(IgnoreEdges),
-    edgeMouseDetectionTimer(0)
+MapGraphicsView::MapGraphicsView(MapGraphicsScene *scene, QWidget *parent) :
+    QWidget(parent)
 {
-    ui->setupUi(this);
+    //Setup the given scene and set the default zoomLevel to 0
+    this->setScene(scene);
+    _zoomLevel = 0;
 
-    QTimer * timer = new QTimer(this);
-    connect(timer,
+    //The default drag mode allows us to drag the map around to move the view
+    this->setDragMode(MapGraphicsView::ScrollHandDrag);
+
+    //TODO: find a better home for running these tests
+    //Conversions::test();
+
+
+    //Start the timer that will cause the tiles to periodically move to follow the view
+    QTimer * renderTimer = new QTimer(this);
+    connect(renderTimer,
             SIGNAL(timeout()),
             this,
-            SLOT(ensureStuffDisplayed()));
-    timer->start(250);
-
-    qsrand(QDateTime::currentMSecsSinceEpoch());
-    //this->rotate(qrand() % 360);
-
-
-    //Create compass widget
-    this->compassWidget = new CompassWidget(this);
-    //No title bar
-    this->compassWidget->setWindowFlags(Qt::CustomizeWindowHint);
-    //No frame
-    this->compassWidget->setWindowFlags(Qt::FramelessWindowHint);
-    this->compassWidget->setAttribute(Qt::WA_TranslucentBackground);
-    connect(this,
-            SIGNAL(destroyed()),
-            this->compassWidget,
-            SLOT(deleteLater()));
-    this->compassWidget->move(QPoint(25,25));
-    this->compassWidget->show();
-
-    connect(this->compassWidget,
-            SIGNAL(rotationChanged(qreal)),
-            this,
-            SLOT(rotate(qreal)));
-
-    //Create zoom widget
-    this->zoomWidget = new ZoomWidget(this);
-    this->zoomWidget->move(QPoint(50,125 + 10));
-    this->zoomWidget->show();
-    this->zoomWidget->setRange(0,17);
-    this->zoomWidget->setValue(0);
-
-    connect(this->zoomWidget,
-            SIGNAL(sliderMoved(int)),
-            this,
-            SLOT(setZoom(int)));
+            SLOT(renderTiles()));
+    renderTimer->start(200);
 }
 
 MapGraphicsView::~MapGraphicsView()
 {
-    delete this->compassWidget;
-    delete ui;
-}
-
-QGraphicsView * MapGraphicsView::qGraphicsView() const
-{
-    return this->ui->graphicsView;
+    qDebug() << this << "Destructing";
+    //When we die, take all of our tile objects with us...
+    foreach(MapTileGraphicsObject * tileObject, _tileObjects)
+    {
+        if (!_childScene.isNull())
+            _childScene->removeItem(tileObject);
+        delete tileObject;
+    }
+    _tileObjects.clear();
 }
 
 void MapGraphicsView::centerOn(const QPointF &pos)
 {
-    QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
-    this->qGraphicsView()->centerOn(tileSource->scenePixelFromCoordinate(pos,this->scene()->getZoomLevel()));
-}
-
-void MapGraphicsView::centerOn(qreal x, qreal y)
-{
-    this->centerOn(QPointF(x,y));
-}
-
-void MapGraphicsView::centerOn(const MapGraphicsItem * item)
-{
-    Q_UNUSED(item)
-}
-
-void MapGraphicsView::setScene(MapGraphicsScene *scene)
-{
-    this->mapGraphicsScene = scene;
-    this->qGraphicsView()->setScene(scene->scene());
-
-    if (this->zoomWidget != 0)
-    {
-        connect(scene,
-                SIGNAL(zoomLevelChanged(int)),
-                this->zoomWidget,
-                SLOT(setValue(int)));
-    }
-}
-
-MapGraphicsScene * MapGraphicsView::scene() const
-{
-    return this->mapGraphicsScene;
-}
-
-
-//public slot
-void MapGraphicsView::rotate(qreal angle)
-{
-    this->qGraphicsView()->rotate(angle);
-}
-
-//public slot
-void MapGraphicsView::zoomIn(MapGraphicsView::ZoomCenterMode mode)
-{
-    this->setZoom(this->scene()->getZoomLevel()+1,mode);
-}
-
-//public slot
-void MapGraphicsView::zoomOut(MapGraphicsView::ZoomCenterMode mode)
-{
-    this->setZoom(this->scene()->getZoomLevel()-1,mode);
-}
-
-//public slot
-void MapGraphicsView::setZoom(int level, MapGraphicsView::ZoomCenterMode mode)
-{
-    int oldZoom = this->scene()->getZoomLevel();
-    if (level == oldZoom)
+    if (_tileSource.isNull())
         return;
 
+    //Find the QGraphicsScene coordinate of the position and then tell the childView to center there
+    QPointF qgsPos = _tileSource->ll2qgs(pos,this->zoomLevel());
+
+    _childView->centerOn(qgsPos);
+}
+
+void MapGraphicsView::centerOn(qreal longitude, qreal latitude)
+{
+    this->centerOn(QPointF(longitude,latitude));
+}
+
+void MapGraphicsView::centerOn(const MapGraphicsObject *item)
+{
+}
+
+QPointF MapGraphicsView::mapToScene(const QPoint viewPos) const
+{
+    if (_tileSource.isNull())
+    {
+        qWarning() << "No tile source --- Transformation cannot work";
+        return QPointF(0,0);
+    }
+
+    QPointF qgsScenePos = _childView->mapToScene(viewPos);
+
+    //Convert from QGraphicsScene coordinates to geo (MapGraphicsScene) coordinates
+    const quint8 zoom = this->zoomLevel();
+
+    return _tileSource->qgs2ll(qgsScenePos,zoom);
+}
+
+MapGraphicsView::DragMode MapGraphicsView::dragMode() const
+{
+    return _dragMode;
+}
+
+void MapGraphicsView::setDragMode(MapGraphicsView::DragMode mode)
+{
+    _dragMode = mode;
+
+    QGraphicsView::DragMode qgvDragMode;
+    if (_dragMode == MapGraphicsView::NoDrag)
+        qgvDragMode = QGraphicsView::NoDrag;
+    else if (_dragMode == MapGraphicsView::ScrollHandDrag)
+        qgvDragMode = QGraphicsView::ScrollHandDrag;
+    else
+        qgvDragMode = QGraphicsView::RubberBandDrag;
+
+    if (_childView.isNull())
+        return;
+
+    _childView->setDragMode(QGraphicsView::ScrollHandDrag);
+}
+
+MapGraphicsScene *MapGraphicsView::scene() const
+{
+    return _scene;
+}
+
+void MapGraphicsView::setScene(MapGraphicsScene * scene)
+{
     /*
-      Find out where the mouse was and store that information so we can re-center
-      after zooming in/out.
+      Create New Stuff
     */
+    //Create a private QGraphicsScene that our (also private) QGraphicsView will use
+    PrivateQGraphicsScene * childScene = new PrivateQGraphicsScene(scene,this);
+
+    //Create a QGraphicsView that handles drawing for us
+    PrivateQGraphicsView * childView = new PrivateQGraphicsView(childScene,this);
+    connect(childView,
+            SIGNAL(hadWheelEvent(QWheelEvent*)),
+            this,
+            SLOT(handleChildViewScrollWheel(QWheelEvent*)));
+
+
+    //Insert new stuff
+    if (this->layout() != 0)
+        delete this->layout();
+    this->setLayout(new QVBoxLayout(this));
+    this->layout()->addWidget(childView);
+
+
+    //Delete old stuff if applicable
+    if (!_childView.isNull())
+        delete _childView;
+    if (!_childScene.isNull())
+        delete _childScene;
+
+
+    //Set new stuff
+    _childView = childView;
+    _childScene = childScene;
+    _scene = scene;
+
+    this->resetQGSSceneSize();
+
+    //Reset the drag mode for the new child view
+    this->setDragMode(this->dragMode());
+}
+
+QSharedPointer<MapTileSource> MapGraphicsView::tileSource() const
+{
+    return _tileSource;
+}
+
+void MapGraphicsView::setTileSource(QSharedPointer<MapTileSource> tSource)
+{
+    _tileSource = tSource;
+
+    if (!_tileSource.isNull())
+    {
+        //QThread * tileSourceThread = new QThread(this);
+        //tileSourceThread->start();
+        //_tileSource->moveToThread(tileSourceThread);
+
+        /*
+        connect(_tileSource.data(),
+                SIGNAL(destroyed()),
+                tileSourceThread,
+                SLOT(quit()));
+        connect(tileSourceThread,
+                SIGNAL(finished()),
+                tileSourceThread,
+                SLOT(deleteLater()));
+                */
+    }
+
+    //Update our tile displays (if any) about the new tile source
+    foreach(MapTileGraphicsObject * tileObject, _tileObjects)
+        tileObject->setTileSource(tSource);
+}
+
+quint8 MapGraphicsView::zoomLevel() const
+{
+    return _zoomLevel;
+}
+
+void MapGraphicsView::setZoomLevel(quint8 nZoom, ZoomMode zMode)
+{
+    if (_tileSource.isNull())
+        return;
+
+    //This stuff is for handling the re-centering upong zoom in/out
     QPointF  centerGeoPos = this->mapToScene(QPoint(this->width()/2,this->height()/2));
-    QGraphicsView * view = this->qGraphicsView();
-    QPointF mousePoint = view->mapToScene(this->mapFromGlobal(QCursor::pos()));
-    QRectF sceneRect = view->sceneRect();
+    QPointF mousePoint = _childView->mapToScene(_childView->mapFromGlobal(QCursor::pos()));
+    QRectF sceneRect = _childScene->sceneRect();
     float xRatio = mousePoint.x() / sceneRect.width();
     float yRatio = mousePoint.y() / sceneRect.height();
-    QPointF centerPos = view->mapToScene(QPoint(this->width()/2,this->height()/2));
+    QPointF centerPos = _childView->mapToScene(QPoint(_childView->width()/2,_childView->height()/2));
     QPointF offset = mousePoint - centerPos;
 
-    //Get the maximum and minimum zoom levels
-    QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
-    const int maxZoom = tileSource->getMaxZoomLevel();
-    const int minZoom = tileSource->getMinZoomLevel();
+    //Change the zoom level
+    _zoomLevel = qMin(_tileSource->maxZoomLevel(),qMax(_tileSource->minZoomLevel(),nZoom));
+
+    //Disable all tile display temporarily. They'll redisplay properly when the timer ticks
+    foreach(MapTileGraphicsObject * tileObject, _tileObjects)
+        tileObject->setVisible(false);
+
+    //Make sure the QGraphicsScene is the right size
+    this->resetQGSSceneSize();
 
 
-
-    QTransform trans = this->qGraphicsView()->transform();
-
-    //Does "overzoom" if we're already zoomed in to our max zoom
-    if (oldZoom == maxZoom && trans.m11() < 10 && trans.m22() < 10 && oldZoom < level)
-    {
-        this->qGraphicsView()->scale((trans.m11() + 0.1)/trans.m11(),(trans.m22() + 0.1)/trans.m22());
-        return;
-    }
-    //Does zooming out of "overzoom"
-    else if (trans.m11() > 1 && trans.m22() > 1 && oldZoom > level)
-    {
-        this->qGraphicsView()->scale((trans.m11() - 0.1)/trans.m11(),(trans.m22() - 0.1)/trans.m22());
-        return;
-    }
-
-
-    quint8 newZoom = oldZoom;
-    if (level > oldZoom)
-        newZoom = qMin<quint8>(oldZoom + 1, maxZoom);
-    else if (oldZoom > minZoom)
-        newZoom = oldZoom - 1;
-
-    //The scene will do everything necessary with tiles to handle the zoom in/out
-    this->scene()->setZoomLevel(newZoom);
-
-    //Center on the same position as before the zoom change
-    sceneRect = view->sceneRect();
+    //Re-center the view where we want it
+    sceneRect = _childScene->sceneRect();
     mousePoint = QPointF(sceneRect.width()*xRatio,
                          sceneRect.height()*yRatio) - offset;
-    if (mode == FollowMouse)
-        view->centerOn(mousePoint);
-    else if (mode == PreserveCenter)
+
+    if (zMode == MouseZoom)
+        _childView->centerOn(mousePoint);
+    else
         this->centerOn(centerGeoPos);
-
-    this->ensureStuffDisplayed();
 }
 
-QGraphicsView::DragMode MapGraphicsView::dragMode() const
+void MapGraphicsView::zoomIn(ZoomMode zMode)
 {
-    return this->qGraphicsView()->dragMode();
-}
-
-void MapGraphicsView::setDragMode(QGraphicsView::DragMode mode)
-{
-    this->qGraphicsView()->setDragMode(mode);
-}
-
-
-MapGraphicsView::EdgeMouseMode MapGraphicsView::edgeMouseMode() const
-{
-    return this->currentEdgeMouseMode;
-}
-
-void MapGraphicsView::setEdgeMouseMode(MapGraphicsView::EdgeMouseMode mode)
-{
-    if (this->currentEdgeMouseMode == mode)
+    if (_tileSource.isNull())
         return;
 
-    this->currentEdgeMouseMode = mode;
-
-    if (mode == ScrollNearEdges || mode == ScrollNearAndBeyondEdges)
-    {
-        this->edgeMouseDetectionTimer = new QTimer(this);
-        connect(this->edgeMouseDetectionTimer,
-                SIGNAL(timeout()),
-                this,
-                SLOT(doEdgeMouseScrolling()));
-        this->edgeMouseDetectionTimer->start(25);
-        this->ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        this->ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    }
-    else
-    {
-        if (this->edgeMouseDetectionTimer != 0)
-        {
-            this->edgeMouseDetectionTimer->deleteLater();
-            this->edgeMouseDetectionTimer = 0;
-        }
-        this->ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        this->ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    }
+    if (this->zoomLevel() < _tileSource->maxZoomLevel())
+        this->setZoomLevel(this->zoomLevel()+1,zMode);
 }
 
-QPoint MapGraphicsView::mapFromScene(const QPointF &point) const
+void MapGraphicsView::zoomOut(ZoomMode zMode)
 {
-    /*
-      We get the MapGraphicsScene coordinates (lat/lon) and convert them to
-      QGraphicsScene coordinates
-      */
-    const quint8 zoomLevel = this->scene()->getZoomLevel();
-    QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
-    QPointF qGraphicsSceneCoordinates = tileSource->scenePixelFromCoordinate(point,zoomLevel);
+    if (_tileSource.isNull())
+        return;
 
-    //Now that we have the QGraphicsScene coordinates we use QGraphicsView's mapFromScene to get the result
-    return this->ui->graphicsView->mapFromScene(qGraphicsSceneCoordinates);
+    if (this->zoomLevel() > _tileSource->minZoomLevel())
+        this->setZoomLevel(this->zoomLevel()-1,zMode);
 }
 
-QPointF MapGraphicsView::mapToScene(const QPoint &point) const
+void MapGraphicsView::handleChildViewScrollWheel(QWheelEvent *event)
 {
-    //Given the QGraphicsView coordinates. Map to QGraphicsScene coordinates
-    QPointF qGraphicsSceneCoordinates = this->ui->graphicsView->mapToScene(point);
-
-    //Now convert to MapGraphicsScene coordinates
-    const quint8 zoomLevel = this->scene()->getZoomLevel();
-    QSharedPointer<MapTileSource> tileSource = MapInfoManager::getInstance()->getMapTileSource();
-
-    return tileSource->coordinateFromScenePixel(qGraphicsSceneCoordinates,zoomLevel);
-}
-
-//protected slot
-void MapGraphicsView::on_graphicsView_hadMousePressEvent(QMouseEvent * event)
-{
-    qDebug() << "Default view mouse press" << event->pos() << this->mapToScene(event->pos());
-    event->ignore();
-}
-
-//protected slot
-void MapGraphicsView::on_graphicsView_hadMouseReleaseEvent(QMouseEvent * event)
-{
-    qDebug() << "Default view mouse release" << event->pos() << this->mapToScene(event->pos());
-    event->ignore();
-}
-
-//protected slot
-void MapGraphicsView::on_graphicsView_hadResizeEvent(QResizeEvent *)
-{
-    this->ensureStuffDisplayed();
-}
-
-//protected slot
-void MapGraphicsView::on_graphicsView_hadWheelEvent(QWheelEvent * event)
-{
+    this->setDragMode(MapGraphicsView::ScrollHandDrag);
     if (event->delta() > 0)
-        this->zoomIn(FollowMouse);
+        this->zoomIn(MouseZoom);
     else
-        this->zoomOut(FollowMouse);
+        this->zoomOut(MouseZoom);
 }
 
-//private slot
-void MapGraphicsView::ensureStuffDisplayed()
+void MapGraphicsView::renderTiles()
 {
-    if (this->scene() == 0)
+    if (_scene.isNull())
+    {
+        qDebug() << "No MapGraphicsScene to render";
         return;
+    }
 
-    QGraphicsView * view = this->qGraphicsView();
-    const QPointF centerPoint = view->mapToScene(view->width()/2,
-                                                 view->height()/2);
+    if (_tileSource.isNull())
+    {
+        qDebug() << "No MapTileSource to render";
+        return;
+    }
 
-    QPolygon viewportPolygon;
-    viewportPolygon << QPoint(0,0) << QPoint(0,view->height()) << QPoint(view->width(),view->height()) << QPoint(view->width(),0);
 
-    const QPolygonF viewportPolygonMapped = view->mapToScene(viewportPolygon);
-
-    this->scene()->setViewerPosition(centerPoint,viewportPolygonMapped);
+    //Layout the tile objects
+    this->doTileLayout();
 }
 
-//private slot
-void MapGraphicsView::doEdgeMouseScrolling()
+//protected
+void MapGraphicsView::doTileLayout()
 {
-    const quint8 margin = 25;
-    const quint8 multiplier = 8;
-    QPoint pos = this->mapFromGlobal(QCursor::pos());
+    //Calculate the center point and polygon of the viewport in QGraphicsScene coordinates
+    const QPointF centerPointQGS = _childView->mapToScene(_childView->width()/2.0,
+                                                          _childView->height()/2.0);
+    QPolygon viewportPolygonQGV;
+    viewportPolygonQGV << QPoint(0,0) << QPoint(0,_childView->height()) << QPoint(_childView->width(),_childView->height()) << QPoint(_childView->width(),0);
 
-    qint32 dx = 0;
-    qint32 dy = 0;
-
-
-    QRect rect = this->rect();
-
-    /*
-      If we're only in the NEAR (not beyond) mode, then we don't move if
-      the mouse is outside the widget/window
-    */
-
-    if (this->edgeMouseMode() == ScrollNearEdges && !rect.contains(pos))
-        return;
+    const QPolygonF viewportPolygonQGS = _childView->mapToScene(viewportPolygonQGV);
 
 
-    //Right edge
-    if (pos.x() > rect.right() - margin)
-        dx = 1;
-    //Left edge
-    else if (pos.x() < rect.left() + margin)
-        dx = -1;
+    //We'll mark tiles that aren't being displayed as free so we can use them
+    QQueue<MapTileGraphicsObject *> freeTiles;
 
-    //Bottom edge
-    if (pos.y() > rect.bottom() - margin)
-        dy = 1;
-    //Top edge
-    else if (pos.y() < rect.top() + margin)
-        dy = -1;
+    QList<QGraphicsItem *> visibleItems = _childScene->items(viewportPolygonQGS);
+    foreach(MapTileGraphicsObject * tileObject, _tileObjects)
+    {
+        if (!tileObject->isVisible() || !visibleItems.contains(tileObject))
+        {
+            freeTiles.enqueue(tileObject);
+            tileObject->setVisible(false);
+        }
+    }
 
-    if (dx == 0 && dy == 0)
-        return;
+    const QRectF boundingRect = viewportPolygonQGS.boundingRect();
+    const quint16 tileSize = _tileSource->tileSize();
+    const quint32 tilesPerRow = sqrt((long double)_tileSource->tilesOnZoomLevel(this->zoomLevel()));
+    const quint32 tilesPerCol = tilesPerRow;
 
-    dx *= multiplier;
-    dy *= multiplier;
+    qint32 perSide = qMax(boundingRect.width()/tileSize,
+                       boundingRect.height()/tileSize) + 3;
+    qint32 xc = qMax((qint32)0,
+                     (qint32)(centerPointQGS.x() / tileSize) - perSide/2);
+    qint32 yc = qMax((qint32)0,
+                     (qint32)(centerPointQGS.y() / tileSize) - perSide/2);
+    const qint32 xMax = qMin((qint32)tilesPerRow,
+                              xc + perSide);
+    const qint32 yMax = qMin(yc + perSide,
+                              (qint32)tilesPerCol);
 
-    //Move the scrollbars forcibly, brooking no nonsense from them
-    QScrollBar * horiz = this->ui->graphicsView->horizontalScrollBar();
-    QScrollBar * vert = this->ui->graphicsView->verticalScrollBar();
-    horiz->setValue(horiz->value()+ dx);
-    vert->setValue(vert->value() + dy);
+    for (qint32 x = xc; x < xMax; x++)
+    {
+        for (qint32 y = yc; y < yMax; y++)
+        {
+            const QPointF scenePos(x*tileSize + tileSize/2,
+                                   y*tileSize + tileSize/2);
+
+
+            bool tileIsThere = false;
+            foreach(QGraphicsItem * item, _childScene->items(scenePos))
+            {
+                if (item->zValue() == -1.0 && item->isVisible())
+                {
+                    tileIsThere = true;
+                    break;
+                }
+            }
+            if (tileIsThere)
+                continue;
+
+            //Just in case we're running low on free tiles, add one
+            if (freeTiles.isEmpty())
+            {
+                MapTileGraphicsObject * tileObject = new MapTileGraphicsObject(tileSize);
+                tileObject->setTileSource(_tileSource);
+                _tileObjects.append(tileObject);
+                _childScene->addItem(tileObject);
+                freeTiles.enqueue(tileObject);
+            }
+            //Get the first free tile and make it do its thing
+            MapTileGraphicsObject * tileObject = freeTiles.dequeue();
+            tileObject->setPos(scenePos);
+            tileObject->setVisible(true);
+            tileObject->setTile(x,y,this->zoomLevel());
+        }
+    }
+
 }
 
+//protected
+void MapGraphicsView::resetQGSSceneSize()
+{
+    if (_tileSource.isNull())
+        return;
+
+    //Make sure the size of our QGraphicsScene is correct
+    quint64 dimension = sqrt((long double)_tileSource->tilesOnZoomLevel(this->zoomLevel()))*_tileSource->tileSize();
+    if (_childScene->sceneRect().width() != dimension)
+        _childScene->setSceneRect(0,0,dimension,dimension);
+}
