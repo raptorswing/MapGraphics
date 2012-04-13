@@ -46,6 +46,7 @@ MapGraphicsView::~MapGraphicsView()
         delete tileObject;
     }
     _tileObjects.clear();
+    _tileSource.clear();
 }
 
 void MapGraphicsView::centerOn(const QPointF &pos)

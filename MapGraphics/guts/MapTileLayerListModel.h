@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QWeakPointer>
 
-#include "CompositeTileSource.h"
+#include "tileSources/CompositeTileSource.h"
 
 class MapTileLayerListModel : public QAbstractListModel
 {

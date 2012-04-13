@@ -4,7 +4,7 @@
 #include <QStyledItemDelegate>
 #include <QWeakPointer>
 
-#include "CompositeTileSource.h"
+#include "tileSources/CompositeTileSource.h"
 
 class MapTileSourceDelegate : public QStyledItemDelegate
 {

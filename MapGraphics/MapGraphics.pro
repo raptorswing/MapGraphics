@@ -18,16 +18,16 @@ SOURCES += MapGraphicsScene.cpp \
     guts/PrivateQGraphicsObject.cpp \
     guts/Conversions.cpp \
     MapTileSource.cpp \
-    GridTileSource.cpp \
+    tileSources/GridTileSource.cpp \
     guts/MapTileGraphicsObject.cpp \
     guts/PrivateQGraphicsView.cpp \
-    OSMTileSource.cpp \
+    tileSources/OSMTileSource.cpp \
     guts/MapGraphicsNetwork.cpp \
-    CompositeTileSource.cpp \
+    tileSources/CompositeTileSource.cpp \
     guts/SQLiteKeyValueStore.cpp \
-    MapTileLayerListModel.cpp \
-    MapTileSourceDelegate.cpp \
-    CompositeTileSourceConfigurationWidget.cpp
+    guts/MapTileLayerListModel.cpp \
+    guts/MapTileSourceDelegate.cpp \
+    guts/CompositeTileSourceConfigurationWidget.cpp
 
 HEADERS += MapGraphicsScene.h\
         MapGraphics_global.h \
@@ -37,16 +37,16 @@ HEADERS += MapGraphicsScene.h\
     guts/PrivateQGraphicsObject.h \
     guts/Conversions.h \
     MapTileSource.h \
-    GridTileSource.h \
+    tileSources/GridTileSource.h \
     guts/MapTileGraphicsObject.h \
     guts/PrivateQGraphicsView.h \
-    OSMTileSource.h \
+    tileSources/OSMTileSource.h \
     guts/MapGraphicsNetwork.h \
-    CompositeTileSource.h \
+    tileSources/CompositeTileSource.h \
     guts/SQLiteKeyValueStore.h \
-    MapTileLayerListModel.h \
-    MapTileSourceDelegate.h \
-    CompositeTileSourceConfigurationWidget.h
+    guts/MapTileLayerListModel.h \
+    guts/MapTileSourceDelegate.h \
+    guts/CompositeTileSourceConfigurationWidget.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
@@ -68,4 +68,4 @@ unix:!symbian {
 }
 
 FORMS += \
-    CompositeTileSourceConfigurationWidget.ui
+    guts/CompositeTileSourceConfigurationWidget.ui

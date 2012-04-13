@@ -6,7 +6,7 @@
 #include <QListView>
 
 #include "MapGraphics_global.h"
-#include "CompositeTileSource.h"
+#include "tileSources/CompositeTileSource.h"
 
 namespace Ui {
 class CompositeTileSourceConfigurationWidget;
@@ -21,8 +21,11 @@ public:
     ~CompositeTileSourceConfigurationWidget();
 
 private slots:
-    
+    void handleCurrentSelectionChanged(QModelIndex,QModelIndex);
+    void handleCompositeChange();
     void on_removeSourceButton_clicked();
+
+    void on_opacitySlider_valueChanged(int value);
 
 private:
     Ui::CompositeTileSourceConfigurationWidget *ui;

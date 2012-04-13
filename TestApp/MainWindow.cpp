@@ -3,10 +3,10 @@
 
 #include "MapGraphicsView.h"
 #include "MapGraphicsScene.h"
-#include "GridTileSource.h"
-#include "OSMTileSource.h"
-#include "CompositeTileSource.h"
-#include "CompositeTileSourceConfigurationWidget.h"
+#include "tileSources/GridTileSource.h"
+#include "tileSources/OSMTileSource.h"
+#include "tileSources/CompositeTileSource.h"
+#include "guts/CompositeTileSourceConfigurationWidget.h"
 
 #include <QSharedPointer>
 #include <QtDebug>
