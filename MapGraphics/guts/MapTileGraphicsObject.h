@@ -20,7 +20,7 @@ public:
     quint16 tileSize() const;
     void setTileSize(quint16 tileSize);
 
-    void setTile(quint32 x, quint32 y, quint8 z);
+    void setTile(quint32 x, quint32 y, quint8 z, bool force = false);
 
     QSharedPointer<MapTileSource> tileSource() const;
     void setTileSource(QSharedPointer<MapTileSource>);
@@ -28,6 +28,7 @@ public:
 
 private slots:
     void handleTileRetrieved(quint32 x, quint32 y, quint8 z);
+    void handleTileInvalidation();
     
 signals:
     void tileRequested(quint32 x, quint32 y, quint8 z);
@@ -40,6 +41,8 @@ private:
     quint32 _tileX;
     quint32 _tileY;
     quint8 _tileZoom;
+
+    bool _initialized;
 
     bool _havePendingRequest;
 

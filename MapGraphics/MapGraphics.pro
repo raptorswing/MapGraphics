@@ -25,9 +25,9 @@ SOURCES += MapGraphicsScene.cpp \
     guts/MapGraphicsNetwork.cpp \
     CompositeTileSource.cpp \
     guts/SQLiteKeyValueStore.cpp \
-    TileSourceConfigurationWidget.cpp \
     MapTileLayerListModel.cpp \
-    MapTileSourceDelegate.cpp
+    MapTileSourceDelegate.cpp \
+    CompositeTileSourceConfigurationWidget.cpp
 
 HEADERS += MapGraphicsScene.h\
         MapGraphics_global.h \
@@ -44,9 +44,9 @@ HEADERS += MapGraphicsScene.h\
     guts/MapGraphicsNetwork.h \
     CompositeTileSource.h \
     guts/SQLiteKeyValueStore.h \
-    TileSourceConfigurationWidget.h \
     MapTileLayerListModel.h \
-    MapTileSourceDelegate.h
+    MapTileSourceDelegate.h \
+    CompositeTileSourceConfigurationWidget.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
@@ -68,4 +68,4 @@ unix:!symbian {
 }
 
 FORMS += \
-    TileSourceConfigurationWidget.ui
+    CompositeTileSourceConfigurationWidget.ui

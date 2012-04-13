@@ -59,7 +59,7 @@ quint8 GridTileSource::minZoomLevel(QPointF ll)
 quint8 GridTileSource::maxZoomLevel(QPointF ll)
 {
     Q_UNUSED(ll)
-    return 10;
+    return 50;
 }
 
 QString GridTileSource::name() const

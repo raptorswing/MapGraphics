@@ -6,7 +6,7 @@
 #include "GridTileSource.h"
 #include "OSMTileSource.h"
 #include "CompositeTileSource.h"
-#include "TileSourceConfigurationWidget.h"
+#include "CompositeTileSourceConfigurationWidget.h"
 
 #include <QSharedPointer>
 #include <QtDebug>
@@ -53,7 +53,9 @@ MainWindow::MainWindow(QWidget *parent) :
             tileThread,
             SLOT(deleteLater()));
 
-    TileSourceConfigurationWidget * tileConfigWidget = new TileSourceConfigurationWidget(composite.toWeakRef(),
+
+    //Create a widget in the dock that lets us configure tile source layers
+    CompositeTileSourceConfigurationWidget * tileConfigWidget = new CompositeTileSourceConfigurationWidget(composite.toWeakRef(),
                                                                                          this->ui->dockWidget);
     this->ui->dockWidget->setWidget(tileConfigWidget);
     delete this->ui->dockWidgetContents;

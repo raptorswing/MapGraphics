@@ -2,15 +2,24 @@
 
 #include <QPainter>
 #include <QtDebug>
+#include <QPushButton>
+#include <QStringBuilder>
 
-MapTileSourceDelegate::MapTileSourceDelegate(QObject *parent) :
-    QStyledItemDelegate(parent)
+MapTileSourceDelegate::MapTileSourceDelegate(QWeakPointer<CompositeTileSource> composite, QObject *parent) :
+    QStyledItemDelegate(parent), _composite(composite)
 {
 }
 
 //virtual from QStyledItemDelegate
 void MapTileSourceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
+    if (strong.isNull())
+        return;
+    QSharedPointer<MapTileSource> childSource = strong->getSource(index.row());
+    if (childSource.isNull())
+        return;
+
     painter->save();
 
     //Get the palette that we should use
@@ -34,12 +43,34 @@ void MapTileSourceDelegate::paint(QPainter *painter, const QStyleOptionViewItem 
     painter->setPen(borderColor);
     painter->drawRect(rect);
 
-    //Draw text
+    QFont nameFont = painter->font();
+    QFont otherFont = painter->font();
+    nameFont.setPointSize(nameFont.pointSize()+2);
+    nameFont.setBold(true);
+
+    //Draw the name of the source
     QRect textRect = rect;
     textRect.adjust(1,0,-1,0);
-    QString string = index.model()->data(index).toString();
+    QString nameString = childSource->name();
     painter->setPen(textColor);
-    painter->drawText(textRect,string,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+    painter->setFont(nameFont);
+    painter->drawText(textRect,nameString,QTextOption(Qt::AlignLeft | Qt::AlignTop));
+
+    //Draw the opacity string
+    QString opacityString = "Opacity: " % QString::number(strong->getOpacity(index.row()),'f',2);
+    painter->setPen(textColor);
+    painter->setFont(otherFont);
+    painter->drawText(textRect,opacityString,QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+
+    //Draw the enabled/disabled string
+    QString state = "Enabled";
+    if (strong->getEnabledFlag(index.row()) == false)
+        state = "Disabled";
+    QString stateString = "Status: " % state;
+    painter->setPen(textColor);
+    painter->setFont(otherFont);
+    painter->drawText(textRect,stateString,QTextOption(Qt::AlignLeft | Qt::AlignBottom));
+
 
     painter->restore();
 }
@@ -50,8 +81,8 @@ QSize MapTileSourceDelegate::sizeHint(const QStyleOptionViewItem &option, const 
     Q_UNUSED(index)
 
     QSize toRet;
-    toRet.setWidth(250);
-    toRet.setHeight(25);
+    toRet.setWidth(150);
+    toRet.setHeight(50);
 
     return toRet;
 }

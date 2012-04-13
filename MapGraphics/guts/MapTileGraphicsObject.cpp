@@ -10,6 +10,7 @@ MapTileGraphicsObject::MapTileGraphicsObject(quint16 tileSize)
     _tileX = 0;
     _tileY = 0;
     _tileZoom = 0;
+    _initialized = false;
     _havePendingRequest = false;
 
     //Default z-value is important --- used in MapGraphicsView
@@ -68,10 +69,10 @@ void MapTileGraphicsObject::setTileSize(quint16 tileSize)
     _tileSize = tileSize;
 }
 
-void MapTileGraphicsObject::setTile(quint32 x, quint32 y, quint8 z)
+void MapTileGraphicsObject::setTile(quint32 x, quint32 y, quint8 z, bool force)
 {
-    //Don't re-request the same tile we're alread displaying
-    if (_tileX == x && _tileY == y && _tileZoom == z)
+    //Don't re-request the same tile we're alread displaying unless force=true or _initialized=false
+    if (_tileX == x && _tileY == y && _tileZoom == z && !force && _initialized)
         return;
 
     //Get rid of the old tile
@@ -85,6 +86,7 @@ void MapTileGraphicsObject::setTile(quint32 x, quint32 y, quint8 z)
     _tileX = x;
     _tileY = y;
     _tileZoom = z;
+    _initialized = true;
 
     //If we have a null tile source, there's not much more to do!
     if (_tileSource.isNull())
@@ -118,20 +120,28 @@ void MapTileGraphicsObject::setTileSource(QSharedPointer<MapTileSource> nSource)
                             SIGNAL(tileRetrieved(quint32,quint32,quint8)),
                             this,
                             SLOT(handleTileRetrieved(quint32,quint32,quint8)));
+        QObject::disconnect(_tileSource.data(),
+                            SIGNAL(allTilesInvalidated()),
+                            this,
+                            SLOT(handleTileInvalidation()));
     }
 
     //Set the new source
     QSharedPointer<MapTileSource> oldSource = _tileSource;
     _tileSource = nSource;
 
-    //We have to fudge the numbers to force a refresh of our tile from the new tile source
-    quint32 oldX = _tileX;
-    _tileX = -1;
-    _havePendingRequest = false;
+    //Connect signals if approprite
+    if (!_tileSource.isNull())
+    {
+        connect(_tileSource.data(),
+                SIGNAL(allTilesInvalidated()),
+                this,
+                SLOT(handleTileInvalidation()));
+        //We connect/disconnect the "tileRetrieved" signal as needed and don't do it here!
+    }
 
-    //Request our tile from the tile source
-    if (!oldSource.isNull())
-        this->setTile(oldX,_tileY,_tileZoom);
+    //Force a refresh from the new source
+    this->handleTileInvalidation();
 }
 
 //private slot
@@ -190,4 +200,15 @@ void MapTileGraphicsObject::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
                         SIGNAL(tileRetrieved(quint32,quint32,quint8)),
                         this,
                         SLOT(handleTileRetrieved(quint32,quint32,quint8)));
+}
+
+//private slot
+void MapTileGraphicsObject::handleTileInvalidation()
+{
+    //If we haven't been initialized with a proper tile coordinate to fetch yet, don't force a refresh
+    if (!_initialized)
+        return;
+
+    //Call setTile with force=true so that it forces a refresh
+    this->setTile(_tileX,_tileY,_tileZoom,true);
 }

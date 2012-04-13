@@ -17,15 +17,7 @@ CompositeTileSource::~CompositeTileSource()
 
     qDebug() << this << "destructing";
     //Clean up all data related to pending tiles
-    QList<QMap<quint32, QImage *> * > pendingTiles = _pendingTiles.values();
-    for (int i = 0; i < pendingTiles.size(); i++)
-    {
-        QMap<quint32, QImage *> * tiles = pendingTiles.at(i);
-        foreach(QImage * tile, tiles->values())
-            delete tile;
-        delete tiles;
-    }
-    _pendingTiles.clear();
+    this->clearPendingTiles();
 
     //Clear the sources
     _childSources.clear();
@@ -125,6 +117,7 @@ void CompositeTileSource::addSourceTop(QSharedPointer<MapTileSource> source, qre
 
     _childSources.insert(0, source);
     _childOpacities.insert(0,opacity);
+    _childEnabledFlags.insert(0,true);
 
     connect(source.data(),
             SIGNAL(tileRetrieved(quint32,quint32,quint8)),
@@ -132,6 +125,7 @@ void CompositeTileSource::addSourceTop(QSharedPointer<MapTileSource> source, qre
             SLOT(handleTileRetrieved(quint32,quint32,quint8)));
 
     this->sourcesChanged();
+    this->allTilesInvalidated();
 }
 
 void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, qreal opacity)
@@ -142,6 +136,7 @@ void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, 
 
     _childSources.append(source);
     _childOpacities.append(opacity);
+    _childEnabledFlags.append(true);
 
     connect(source.data(),
             SIGNAL(tileRetrieved(quint32,quint32,quint8)),
@@ -149,6 +144,22 @@ void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, 
             SLOT(handleTileRetrieved(quint32,quint32,quint8)));
 
     this->sourcesChanged();
+    this->allTilesInvalidated();
+}
+
+void CompositeTileSource::removeSource(int index)
+{
+    QMutexLocker lock(_globalMutex);
+    if (index < 0 || index >= _childSources.size())
+        return;
+
+    _childSources.removeAt(index);
+    _childOpacities.removeAt(index);
+    _childEnabledFlags.removeAt(index);
+    this->clearPendingTiles();
+
+    this->sourcesChanged();
+    this->allTilesInvalidated();
 }
 
 int CompositeTileSource::numSources() const
@@ -172,6 +183,47 @@ qreal CompositeTileSource::getOpacity(int index) const
     if (index < 0 || index >= _childSources.size())
         return 0.0;
     return _childOpacities[index];
+}
+
+void CompositeTileSource::setOpacity(int index, qreal opacity)
+{
+    opacity = qMin<qreal>(1.0,qMax<qreal>(0.0,opacity));
+
+    QMutexLocker lock(_globalMutex);
+    if (index < 0 || index >= _childSources.size())
+        return;
+
+    if (_childOpacities[index] == opacity)
+        return;
+
+    _childOpacities[index] = opacity;
+
+    //emit signal to tell any models watching us that we've changed
+    this->sourcesChanged();
+    this->allTilesInvalidated();
+}
+
+bool CompositeTileSource::getEnabledFlag(int index) const
+{
+    QMutexLocker lock(_globalMutex);
+    if (index < 0 || index >= _childSources.size())
+        return 0.0;
+    return _childEnabledFlags[index];
+}
+
+void CompositeTileSource::setEnabledFlag(int index, bool isEnabled)
+{
+    QMutexLocker lock(_globalMutex);
+    if (index < 0 || index >= _childSources.size())
+        return;
+
+    if (_childEnabledFlags[index] == isEnabled)
+        return;
+
+    _childEnabledFlags[index] = isEnabled;
+
+    this->sourcesChanged();
+    this->allTilesInvalidated();
 }
 
 //protected
@@ -272,7 +324,10 @@ void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
     for (int i = tiles->size()-1; i >= 0; i--)
     {
         QImage * childTile = tiles->value(i);
-        painter.setOpacity(_childOpacities.at(i));
+        qreal opacity = _childOpacities[i];
+        if (_childEnabledFlags[i] == false)
+            opacity = 0.0;
+        painter.setOpacity(opacity);
         painter.drawImage(0,0,*childTile);
         delete childTile;
     }
@@ -281,4 +336,18 @@ void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
     painter.end();
 
     this->prepareRetrievedTile(x,y,z,toRet);
+}
+
+//private slot
+void CompositeTileSource::clearPendingTiles()
+{
+    QList<QMap<quint32, QImage *> * > pendingTiles = _pendingTiles.values();
+    for (int i = 0; i < pendingTiles.size(); i++)
+    {
+        QMap<quint32, QImage *> * tiles = pendingTiles.at(i);
+        foreach(QImage * tile, tiles->values())
+            delete tile;
+        delete tiles;
+    }
+    _pendingTiles.clear();
 }

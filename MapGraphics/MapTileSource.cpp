@@ -102,13 +102,13 @@ bool MapTileSource::cacheID2xyz(const QString & string, quint32 *x, quint32 *y, 
     }
 
     bool ok = true;
-    *x = list.at(0).toUShort(&ok);
+    *x = list.at(0).toUInt(&ok);
     if (!ok)
         return false;
-    *y = list.at(1).toUShort(&ok);
+    *y = list.at(1).toUInt(&ok);
     if (!ok)
         return false;
-    *z = list.at(2).toUShort(&ok);
+    *z = list.at(2).toUInt(&ok);
     return ok;
 }
 
@@ -228,8 +228,6 @@ void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTi
     QFile fp(filePath);
     if (fp.exists())
         return;
-
-    qDebug() << this->name() << "caching" << cacheID;
 
     //If they told us when the tile expires, store that expiration. Otherwise, use the default.
     bool mustDeleteExpireTime = false;

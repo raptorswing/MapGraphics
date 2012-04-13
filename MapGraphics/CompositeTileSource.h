@@ -44,9 +44,13 @@ public:
 
     void addSourceTop(QSharedPointer<MapTileSource>, qreal opacity = 1.0);
     void addSourceBottom(QSharedPointer<MapTileSource>, qreal opacity = 1.0);
+    void removeSource(int index);
     int numSources() const;
     QSharedPointer<MapTileSource> getSource(int index) const;
     qreal getOpacity(int index) const;
+    void setOpacity(int index, qreal opacity);
+    bool getEnabledFlag(int index) const;
+    void setEnabledFlag(int index, bool isEnabled);
 
 
 
@@ -66,12 +70,15 @@ public slots:
 
 private slots:
     void handleTileRetrieved(quint32 x, quint32 y, quint8 z);
+    void clearPendingTiles();
 
 private:
     QMutex * _globalMutex;
     QList<QSharedPointer<MapTileSource> > _childSources;
     QList<qreal> _childOpacities;
+    QList<bool> _childEnabledFlags;
 
+    //A hash of QString:QMap pointer to quint32:QImage pointer
     QHash<QString, QMap<quint32, QImage *> * > _pendingTiles;
     
 };

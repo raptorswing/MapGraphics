@@ -60,7 +60,7 @@ quint8 OSMTileSource::minZoomLevel(QPointF ll)
 quint8 OSMTileSource::maxZoomLevel(QPointF ll)
 {
     Q_UNUSED(ll)
-    return 17;
+    return 18;
 }
 
 QString OSMTileSource::name() const
@@ -179,7 +179,10 @@ void OSMTileSource::handleNetworkRequestFinished()
     //Convert the cacheID back into x,y,z tile coordinates
     quint32 x,y,z;
     if (!MapTileSource::cacheID2xyz(cacheID,&x,&y,&z))
+    {
+        qWarning() << "Failed to convert cacheID" << cacheID << "back to xyz";
         return;
+    }
 
     QByteArray bytes = reply->readAll();
     QImage * image = new QImage();

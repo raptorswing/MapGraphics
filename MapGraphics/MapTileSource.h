@@ -149,6 +149,13 @@ signals:
      * @param z
      */
     void tileRequested(quint32 x, quint32 y, quint8 z);
+
+    /*!
+     \brief Emitted when vital parameters of the tile source have changed and anyone displaying the tiles should
+      refresh.
+
+    */
+    void allTilesInvalidated();
     
 public slots:
 
@@ -264,8 +271,16 @@ private:
     */
     void loadCacheExpirationsFromDisk();
 
-    bool _cacheExpirationsLoaded;
     void saveCacheExpirationsToDisk();
+
+    bool _cacheExpirationsLoaded;
+
+    /*
+      loadCacheExpirationsFromDisk() stores the place where it loaded from here.
+      When we're destructing and need to serialize out we can use this instead of
+      foolishly trying to call a pure-virtual method (name()) from the destructor
+    */
+    QString _cacheExpirationsFile;
 
     MapTileSource::CacheMode _cacheMode;
 
@@ -273,11 +288,10 @@ private:
     QCache<QString, QImage> _tempCache;
     QMutex _tempCacheLock;
 
-    //The "Real" cache, where tiles are saved in memory so we don't download them again
+    //The "real" cache, where tiles are saved in memory so we don't download them again
     QCache<QString, QImage> _memoryCache;
 
     QHash<QString, QDateTime> _cacheExpirations;
-    QString _cacheExpirationsFile;
     
 };
 

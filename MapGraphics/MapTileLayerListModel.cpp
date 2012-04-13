@@ -1,6 +1,7 @@
 #include "MapTileLayerListModel.h"
 
 #include <QModelIndex>
+#include <QtDebug>
 
 MapTileLayerListModel::MapTileLayerListModel(QWeakPointer<CompositeTileSource> composite,QObject *parent) :
     QAbstractListModel(parent), _composite(composite)
@@ -8,6 +9,8 @@ MapTileLayerListModel::MapTileLayerListModel(QWeakPointer<CompositeTileSource> c
     QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
     if (strong.isNull())
         return;
+
+    //When the model (CompositeTileSource) changes, reload data
     connect(strong.data(),
             SIGNAL(sourcesChanged()),
             this,
@@ -48,6 +51,13 @@ QVariant MapTileLayerListModel::data(const QModelIndex &index, int role) const
     }
     else
         return QVariant();
+}
+
+Qt::ItemFlags MapTileLayerListModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+    return (Qt::ItemIsSelectable| Qt::ItemIsEnabled);
 }
 
 void MapTileLayerListModel::handleCompositeSourcesChanged()

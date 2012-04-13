@@ -66,6 +66,7 @@ void MapGraphicsView::centerOn(qreal longitude, qreal latitude)
 
 void MapGraphicsView::centerOn(const MapGraphicsObject *item)
 {
+    Q_UNUSED(item)
 }
 
 QPointF MapGraphicsView::mapToScene(const QPoint viewPos) const
