@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     view->setTileSource(composite);
 
     //Throw the tile sources in a different thread
-    QThread * tileThread = new QThread(this);
+    QThread * tileThread = new QThread();
     composite->moveToThread(tileThread);
     gridTiles->moveToThread(tileThread);
     aerialTiles->moveToThread(tileThread);
@@ -48,6 +48,10 @@ MainWindow::MainWindow(QWidget *parent) :
             SIGNAL(destroyed()),
             tileThread,
             SLOT(quit()));
+    connect(tileThread,
+            SIGNAL(finished()),
+            tileThread,
+            SLOT(deleteLater()));
 
     TileSourceConfigurationWidget * tileConfigWidget = new TileSourceConfigurationWidget(composite.toWeakRef(),
                                                                                          this->ui->dockWidget);

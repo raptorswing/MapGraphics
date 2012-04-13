@@ -46,6 +46,8 @@ public:
     void addSourceBottom(QSharedPointer<MapTileSource>, qreal opacity = 1.0);
     int numSources() const;
     QSharedPointer<MapTileSource> getSource(int index) const;
+    qreal getOpacity(int index) const;
+
 
 
 protected:

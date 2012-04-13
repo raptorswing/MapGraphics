@@ -166,6 +166,14 @@ QSharedPointer<MapTileSource> CompositeTileSource::getSource(int index) const
     return _childSources[index];
 }
 
+qreal CompositeTileSource::getOpacity(int index) const
+{
+    QMutexLocker lock(_globalMutex);
+    if (index < 0 || index >= _childSources.size())
+        return 0.0;
+    return _childOpacities[index];
+}
+
 //protected
 void CompositeTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
 {
