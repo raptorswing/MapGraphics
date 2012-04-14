@@ -71,7 +71,7 @@ void MapTileGraphicsObject::setTileSize(quint16 tileSize)
 
 void MapTileGraphicsObject::setTile(quint32 x, quint32 y, quint8 z, bool force)
 {
-    //Don't re-request the same tile we're alread displaying unless force=true or _initialized=false
+    //Don't re-request the same tile we're already displaying unless force=true or _initialized=false
     if (_tileX == x && _tileY == y && _tileZoom == z && !force && _initialized)
         return;
 

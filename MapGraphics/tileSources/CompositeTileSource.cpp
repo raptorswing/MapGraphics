@@ -147,6 +147,25 @@ void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, 
     this->allTilesInvalidated();
 }
 
+void CompositeTileSource::moveSource(int from, int to)
+{
+    if (from < 0 || to < 0)
+        return;
+
+    QMutexLocker lock(_globalMutex);
+
+    int size = this->numSources();
+    if (from >= size || to >= size)
+        return;
+
+    _childSources.move(from,to);
+    _childOpacities.move(from,to);
+    _childEnabledFlags.move(from,to);
+
+    this->sourcesChanged();
+    this->allTilesInvalidated();
+}
+
 void CompositeTileSource::removeSource(int index)
 {
     QMutexLocker lock(_globalMutex);
@@ -237,6 +256,8 @@ void CompositeTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
                                     this->tileSize(),
                                     QImage::Format_ARGB32_Premultiplied);
         QPainter painter(toRet);
+        painter.fillRect(toRet->rect(),
+                         Qt::white);
         painter.drawText(toRet->rect(),
                          QString("Composite Source Empty"),
                          QTextOption(Qt::AlignCenter));
@@ -312,9 +333,12 @@ void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
     */
     QMap<quint32, QImage *> * tiles = _pendingTiles.value(cacheID);
     tiles->insert(tileSourceIndex,tile);
+
+    //Still waiting for a tile or two?
     if (tiles->size() < _childSources.size())
         return;
 
+    //Time to build the finished composite tile
     QImage * toRet = new QImage(this->tileSize(),
                                 this->tileSize(),
                                 QImage::Format_ARGB32_Premultiplied);

@@ -45,11 +45,15 @@ void CompositeTileSourceConfigurationWidget::handleCurrentSelectionChanged(QMode
     this->ui->removeSourceButton->setEnabled(enableGUI);
     this->ui->opacitySlider->setEnabled(enableGUI);
 
+    QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
+    if (strong.isNull())
+        return;
+
+    this->ui->moveDownButton->setEnabled(enableGUI &&  (strong->numSources()-1) > current.row());
+    this->ui->moveUpButton->setEnabled(enableGUI && 0 < current.row());
+
     if (enableGUI)
     {
-        QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
-        if (strong.isNull())
-            return;
         qreal opacityFloat = strong->getOpacity(current.row());
         this->ui->opacitySlider->setValue(opacityFloat*100);
     }
@@ -98,4 +102,41 @@ void CompositeTileSourceConfigurationWidget::on_opacitySlider_valueChanged(int v
     qreal opacityFloat = (qreal)value / 100.0;
 
     strong->setOpacity(index.row(),opacityFloat);
+}
+
+//private slot
+void CompositeTileSourceConfigurationWidget::on_moveDownButton_clicked()
+{
+    QItemSelectionModel * selModel = this->ui->listView->selectionModel();
+    QModelIndex index = selModel->currentIndex();
+
+    if (!index.isValid())
+        return;
+
+    QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
+    if (strong.isNull())
+        return;
+
+    int numberOfLayers = strong->numSources();
+    int currentIndex = index.row();
+    int desiredIndex = qMin<int>(numberOfLayers-1,currentIndex+1);
+    strong->moveSource(currentIndex,desiredIndex);
+}
+
+//private slot
+void CompositeTileSourceConfigurationWidget::on_moveUpButton_clicked()
+{
+    QItemSelectionModel * selModel = this->ui->listView->selectionModel();
+    QModelIndex index = selModel->currentIndex();
+
+    if (!index.isValid())
+        return;
+
+    QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
+    if (strong.isNull())
+        return;
+
+    int currentIndex = index.row();
+    int desiredIndex = qMax<int>(0,currentIndex-1);
+    strong->moveSource(currentIndex,desiredIndex);
 }

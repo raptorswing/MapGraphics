@@ -27,6 +27,10 @@ private slots:
 
     void on_opacitySlider_valueChanged(int value);
 
+    void on_moveDownButton_clicked();
+
+    void on_moveUpButton_clicked();
+
 private:
     Ui::CompositeTileSourceConfigurationWidget *ui;
     QWeakPointer<CompositeTileSource> _composite;

@@ -44,6 +44,7 @@ public:
 
     void addSourceTop(QSharedPointer<MapTileSource>, qreal opacity = 1.0);
     void addSourceBottom(QSharedPointer<MapTileSource>, qreal opacity = 1.0);
+    void moveSource(int from, int to);
     void removeSource(int index);
     int numSources() const;
     QSharedPointer<MapTileSource> getSource(int index) const;

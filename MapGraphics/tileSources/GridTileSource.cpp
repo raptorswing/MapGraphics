@@ -64,7 +64,7 @@ quint8 GridTileSource::maxZoomLevel(QPointF ll)
 
 QString GridTileSource::name() const
 {
-    return "Grid";
+    return "Grid Tiles";
 }
 
 QString GridTileSource::tileFileExtension() const

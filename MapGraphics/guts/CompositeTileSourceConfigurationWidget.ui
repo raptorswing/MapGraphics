@@ -37,6 +37,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="moveDownButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>D</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="moveUpButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>U</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QSlider" name="opacitySlider">
        <property name="enabled">
         <bool>false</bool>
