@@ -9,8 +9,8 @@ const qreal PI = 3.14159265358979323846;
 const qreal deg2rad = PI / 180.0;
 const qreal rad2deg = 180.0 / PI;
 
-GridTileSource::GridTileSource(QObject *parent) :
-    MapTileSource(parent)
+GridTileSource::GridTileSource() :
+    MapTileSource()
 {
     this->setCacheMode(MapTileSource::NoCaching);
 }

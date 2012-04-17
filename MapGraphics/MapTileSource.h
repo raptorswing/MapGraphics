@@ -30,7 +30,7 @@ public:
     };
 
 public:
-    explicit MapTileSource(QObject * parent=0);
+    explicit MapTileSource();
     virtual ~MapTileSource();
 
     /**

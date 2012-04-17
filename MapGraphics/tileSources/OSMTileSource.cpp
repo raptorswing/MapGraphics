@@ -11,14 +11,14 @@ const qreal PI = 3.14159265358979323846;
 const qreal deg2rad = PI / 180.0;
 const qreal rad2deg = 180.0 / PI;
 
-OSMTileSource::OSMTileSource(OSMTileType tileType, QObject *parent) :
-    MapTileSource(parent), _tileType(tileType)
+OSMTileSource::OSMTileSource(OSMTileType tileType) :
+    MapTileSource(), _tileType(tileType)
 {
 }
 
 OSMTileSource::~OSMTileSource()
 {
-    qDebug() << this << _tileType << "Destructing";
+    qDebug() << this << this->name() << "Destructing";
 }
 
 QPointF OSMTileSource::ll2qgs(const QPointF &ll, quint8 zoomLevel) const

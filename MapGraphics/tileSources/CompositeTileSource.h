@@ -14,7 +14,7 @@ class MAPGRAPHICSSHARED_EXPORT CompositeTileSource : public MapTileSource
 {
     Q_OBJECT
 public:
-    explicit CompositeTileSource(QObject *parent = 0);
+    explicit CompositeTileSource();
     virtual ~CompositeTileSource();
 
     //pure-virtual from MapTileSource
@@ -74,6 +74,7 @@ private slots:
     void clearPendingTiles();
 
 private:
+    void doChildThreading(QSharedPointer<MapTileSource>);
     QMutex * _globalMutex;
     QList<QSharedPointer<MapTileSource> > _childSources;
     QList<qreal> _childOpacities;

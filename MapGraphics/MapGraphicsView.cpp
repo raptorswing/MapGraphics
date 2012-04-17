@@ -7,6 +7,8 @@
 #include <QQueue>
 #include <QSet>
 #include <QWheelEvent>
+#include <QCoreApplication>
+#include <QThread>
 
 #include "guts/PrivateQGraphicsScene.h"
 #include "guts/PrivateQGraphicsView.h"
@@ -21,10 +23,6 @@ MapGraphicsView::MapGraphicsView(MapGraphicsScene *scene, QWidget *parent) :
 
     //The default drag mode allows us to drag the map around to move the view
     this->setDragMode(MapGraphicsView::ScrollHandDrag);
-
-    //TODO: find a better home for running these tests
-    //Conversions::test();
-
 
     //Start the timer that will cause the tiles to periodically move to follow the view
     QTimer * renderTimer = new QTimer(this);
@@ -46,7 +44,30 @@ MapGraphicsView::~MapGraphicsView()
         delete tileObject;
     }
     _tileObjects.clear();
-    _tileSource.clear();
+
+    if (!_tileSource.isNull())
+    {
+        //Find the tileSource's thread
+        QPointer<QThread> tileSourceThread = _tileSource->thread();
+
+        /*
+         Clear the QSharedPointer to the tilesource. Unless there's a serious problem, we should be the
+         last thing holding that reference and we expect it to be deleted
+        */
+        _tileSource.clear();
+
+        //After the tilesource is deleted, we wait for the thread it was running in to shut down
+        int count = 0;
+        const int maxCount = 100;
+        while (!tileSourceThread.isNull() && !tileSourceThread->wait(100))
+        {
+            //We have to process events while it's shutting down in case it uses signals/slots to shut down
+            //Hint: it does
+            QCoreApplication::processEvents(QEventLoop::ExcludeSocketNotifiers | QEventLoop::ExcludeUserInputEvents);
+            if (++count == maxCount)
+                break;
+        }
+    }
 }
 
 void MapGraphicsView::centerOn(const QPointF &pos)
@@ -166,11 +187,12 @@ void MapGraphicsView::setTileSource(QSharedPointer<MapTileSource> tSource)
 
     if (!_tileSource.isNull())
     {
-        //QThread * tileSourceThread = new QThread(this);
-        //tileSourceThread->start();
-        //_tileSource->moveToThread(tileSourceThread);
+        //Create a thread just for the tile source
+        QThread * tileSourceThread = new QThread();
+        tileSourceThread->start();
+        _tileSource->moveToThread(tileSourceThread);
 
-        /*
+        //Set it up so that the thread is destroyed when the tile source is!
         connect(_tileSource.data(),
                 SIGNAL(destroyed()),
                 tileSourceThread,
@@ -179,7 +201,6 @@ void MapGraphicsView::setTileSource(QSharedPointer<MapTileSource> tSource)
                 SIGNAL(finished()),
                 tileSourceThread,
                 SLOT(deleteLater()));
-                */
     }
 
     //Update our tile displays (if any) about the new tile source

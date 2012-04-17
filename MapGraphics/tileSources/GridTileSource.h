@@ -9,7 +9,7 @@ class MAPGRAPHICSSHARED_EXPORT GridTileSource : public MapTileSource
 {
     Q_OBJECT
 public:
-    explicit GridTileSource(QObject * parent = 0);
+    explicit GridTileSource();
     virtual ~GridTileSource();
 
     virtual QPointF ll2qgs(const QPointF& ll, quint8 zoomLevel) const;

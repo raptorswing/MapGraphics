@@ -19,7 +19,7 @@ public:
     };
 
 public:
-    explicit OSMTileSource(OSMTileSource::OSMTileType tileType = OSMTiles,QObject * parent = 0);
+    explicit OSMTileSource(OSMTileSource::OSMTileType tileType = OSMTiles);
     virtual ~OSMTileSource();
 
     virtual QPointF ll2qgs(const QPointF& ll, quint8 zoomLevel) const;

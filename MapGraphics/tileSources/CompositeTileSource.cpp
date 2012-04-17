@@ -3,9 +3,11 @@
 #include <QtDebug>
 #include <QPainter>
 #include <QMutexLocker>
+#include <QThread>
+#include <QPointer>
 
-CompositeTileSource::CompositeTileSource(QObject *parent) :
-    MapTileSource(parent)
+CompositeTileSource::CompositeTileSource() :
+    MapTileSource()
 {
     _globalMutex = new QMutex(QMutex::Recursive);
     this->setCacheMode(MapTileSource::NoCaching);
@@ -20,7 +22,22 @@ CompositeTileSource::~CompositeTileSource()
     this->clearPendingTiles();
 
     //Clear the sources
+    //We first find all the sources' threads and put them in a list
+    QList<QPointer<QThread> > tileSourceThreads;
+    foreach(QSharedPointer<MapTileSource> source, _childSources)
+        tileSourceThreads.append(QPointer<QThread>(source->thread()));
+
+    //Then we clear the sources
     _childSources.clear();
+
+    int numThreads = tileSourceThreads.size();
+    //Then we wait for all of those threads to shut down
+    for (int i = 0; i < numThreads; i++)
+    {
+        QPointer<QThread> thread = tileSourceThreads[i];
+        if (!thread.isNull() && thread != this->thread())
+            thread->wait(10000);
+    }
 
     delete this->_globalMutex;
 }
@@ -115,6 +132,9 @@ void CompositeTileSource::addSourceTop(QSharedPointer<MapTileSource> source, qre
     if (source.isNull())
         return;
 
+    //Put the child in its own thread
+    this->doChildThreading(source);
+
     _childSources.insert(0, source);
     _childOpacities.insert(0,opacity);
     _childEnabledFlags.insert(0,true);
@@ -133,6 +153,9 @@ void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, 
     QMutexLocker lock(_globalMutex);
     if (source.isNull())
         return;
+
+    //Put the child in its own thread
+    this->doChildThreading(source);
 
     _childSources.append(source);
     _childOpacities.append(opacity);
@@ -374,4 +397,26 @@ void CompositeTileSource::clearPendingTiles()
         delete tiles;
     }
     _pendingTiles.clear();
+}
+
+//private
+void CompositeTileSource::doChildThreading(QSharedPointer<MapTileSource> source)
+{
+    if (source.isNull())
+        return;
+
+    //We create a new thread for each child source in our care.
+    QThread * sourceThread = new QThread();
+    sourceThread->start();
+    source->moveToThread(sourceThread);
+
+    //Set the thread up so that it will shutdown and be destroyed when the tilesource is dead
+    connect(source.data(),
+            SIGNAL(destroyed()),
+            sourceThread,
+            SLOT(quit()));
+    connect(sourceThread,
+            SIGNAL(finished()),
+            sourceThread,
+            SLOT(deleteLater()));
 }

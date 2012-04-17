@@ -10,8 +10,8 @@ const QString MAPGRAPHICS_CACHE_FOLDER_NAME = ".MapGraphicsCache";
 const quint32 DEFAULT_CACHE_DAYS = 7;
 const quint64 MAX_DISK_CACHE_READ_ATTEMPTS = 100000;
 
-MapTileSource::MapTileSource(QObject *parent) :
-    QObject(parent), _cacheExpirationsLoaded(false)
+MapTileSource::MapTileSource() :
+    QObject(), _cacheExpirationsLoaded(false)
 {
     this->setCacheMode(DiskAndMemCaching);
 
@@ -25,7 +25,6 @@ MapTileSource::MapTileSource(QObject *parent) :
 
 MapTileSource::~MapTileSource()
 {
-    qDebug() << this << "destructing";
     this->saveCacheExpirationsToDisk();
 }
 
