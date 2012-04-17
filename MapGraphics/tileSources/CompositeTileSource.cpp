@@ -5,6 +5,7 @@
 #include <QMutexLocker>
 #include <QThread>
 #include <QPointer>
+#include <QTimer>
 
 CompositeTileSource::CompositeTileSource() :
     MapTileSource()
@@ -289,9 +290,19 @@ void CompositeTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
         return;
     }
 
-    //Mark the request so we can build tiles as they come
+    //Allocate space in memory to store the tiles as they come before we composite them.
+    //If we already have a space allocated from a previous un-finished request, clear it and start over
     QString cacheID = MapTileSource::createCacheID(x,y,z);
-    _pendingTiles.insert(cacheID,new QMap<quint32,QImage *>());
+    if (_pendingTiles.contains(cacheID))
+    {
+        QMap<quint32, QImage *> * tiles = _pendingTiles.value(cacheID);
+        foreach(QImage * tile, *tiles)
+            delete tile;
+        tiles->clear();
+    }
+    //Otherwise, create a new space
+    else
+        _pendingTiles.insert(cacheID,new QMap<quint32,QImage *>());
 
     //Request tiles from all of our beautiful children
     for (int i = 0; i < _childSources.size(); i++)

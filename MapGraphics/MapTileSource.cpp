@@ -15,7 +15,7 @@ MapTileSource::MapTileSource() :
 {
     this->setCacheMode(DiskAndMemCaching);
 
-    //Connect this signal/slot pair to communicate across threads.
+    //We connect this signal/slot pair to communicate across threads.
     connect(this,
             SIGNAL(tileRequested(quint32,quint32,quint8)),
             this,
@@ -203,14 +203,14 @@ QImage *MapTileSource::fromDiskCache(const QString &cacheID)
         }
     }
 
-    QImage * pixmap = new QImage();
-    if (!pixmap->loadFromData(data))
+    QImage * image = new QImage();
+    if (!image->loadFromData(data))
     {
-        delete pixmap;
+        delete image;
         return 0;
     }
 
-    return pixmap;
+    return image;
 }
 
 void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTime *expireTime)
@@ -232,9 +232,9 @@ void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTi
     bool mustDeleteExpireTime = false;
     if (expireTime == 0)
     {
+        mustDeleteExpireTime = true;
         expireTime = new QDateTime(QDateTime::currentDateTime());
         *expireTime = expireTime->addDays(DEFAULT_CACHE_DAYS);
-        mustDeleteExpireTime = true;
     }
     _cacheExpirations.insert(cacheID,*expireTime);
 

@@ -20,7 +20,6 @@ protected:
     MapGraphicsNetwork();
 
 private:
-    //static MapGraphicsNetwork * _instance;
     static QHash<QThread *, MapGraphicsNetwork *> _instances;
     QNetworkAccessManager * _manager;
 

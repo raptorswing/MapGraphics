@@ -2,11 +2,11 @@
 
 #include <QNetworkRequest>
 #include <QThread>
+#include <QtDebug>
 
 const QByteArray DEFAULT_USER_AGENT = "MapGraphics";
 
 //static
-//MapGraphicsNetwork * MapGraphicsNetwork::_instance = 0;
 QHash<QThread *, MapGraphicsNetwork *> MapGraphicsNetwork::_instances = QHash<QThread *, MapGraphicsNetwork*>();
 
 //static
@@ -17,11 +17,6 @@ MapGraphicsNetwork *MapGraphicsNetwork::getInstance()
     if (!MapGraphicsNetwork::_instances.contains(current))
         MapGraphicsNetwork::_instances.insert(current, new MapGraphicsNetwork());
     return MapGraphicsNetwork::_instances.value(current);
-    /*
-    if (MapGraphicsNetwork::_instance == 0)
-        MapGraphicsNetwork::_instance = new MapGraphicsNetwork();
-    return MapGraphicsNetwork::_instance;
-    */
 }
 
 MapGraphicsNetwork::~MapGraphicsNetwork()

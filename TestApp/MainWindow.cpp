@@ -30,18 +30,16 @@ MainWindow::MainWindow(QWidget *parent) :
     QSharedPointer<OSMTileSource> aerialTiles(new OSMTileSource(OSMTileSource::MapQuestAerialTiles), &QObject::deleteLater);
     QSharedPointer<GridTileSource> gridTiles(new GridTileSource(), &QObject::deleteLater);
     QSharedPointer<CompositeTileSource> composite(new CompositeTileSource(), &QObject::deleteLater);
-    view->setTileSource(composite);
     composite->addSourceBottom(osmTiles,0.75);
     composite->addSourceBottom(aerialTiles);
     composite->addSourceTop(gridTiles);
-
+    view->setTileSource(composite);
 
     //Create a widget in the dock that lets us configure tile source layers
     CompositeTileSourceConfigurationWidget * tileConfigWidget = new CompositeTileSourceConfigurationWidget(composite.toWeakRef(),
                                                                                          this->ui->dockWidget);
     this->ui->dockWidget->setWidget(tileConfigWidget);
     delete this->ui->dockWidgetContents;
-
 }
 
 MainWindow::~MainWindow()
