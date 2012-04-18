@@ -361,7 +361,7 @@ void MapGraphicsView::doTileLayout()
             {
                 MapTileGraphicsObject * tileObject = new MapTileGraphicsObject(tileSize);
                 tileObject->setTileSource(_tileSource);
-                _tileObjects.append(tileObject);
+                _tileObjects.insert(tileObject);
                 _childScene->addItem(tileObject);
                 freeTiles.enqueue(tileObject);
             }
@@ -371,6 +371,15 @@ void MapGraphicsView::doTileLayout()
             tileObject->setVisible(true);
             tileObject->setTile(x,y,this->zoomLevel());
         }
+    }
+
+    //If we've got a lot of free tiles left over, delete some of them
+    while (freeTiles.size() > 2)
+    {
+        MapTileGraphicsObject * tileObject = freeTiles.dequeue();
+        _tileObjects.remove(tileObject);
+        _childScene->removeItem(tileObject);
+        delete tileObject;
     }
 
 }

@@ -82,7 +82,7 @@ private:
     QPointer<QGraphicsScene> _childScene;
     QSharedPointer<MapTileSource> _tileSource;
 
-    QList<MapTileGraphicsObject *> _tileObjects;
+    QSet<MapTileGraphicsObject *> _tileObjects;
 
     quint8 _zoomLevel;
 
