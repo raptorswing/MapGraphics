@@ -21,6 +21,15 @@ MapTileSource::MapTileSource() :
             this,
             SLOT(startTileRequest(quint32,quint32,quint8)),
             Qt::QueuedConnection);
+
+    /*
+      When all our tiles have been invalidated, we clear our temp cache so any misinformed clients
+      that don't notice will get a null tile instead of an old tile.
+    */
+    connect(this,
+            SIGNAL(allTilesInvalidated()),
+            this,
+            SLOT(clearTempCache()));
 }
 
 MapTileSource::~MapTileSource()
@@ -80,6 +89,12 @@ void MapTileSource::startTileRequest(quint32 x, quint32 y, quint8 z)
 
     //If we get here, the tile was not cached and we must try to retrieve it
     this->fetchTile(x,y,z);
+}
+
+//private slot
+void MapTileSource::clearTempCache()
+{
+    _tempCache.clear();
 }
 
 //protected static

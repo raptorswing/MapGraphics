@@ -363,9 +363,16 @@ void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
 
     /*
       Put the tile into our pendingTiles structure. If it was the last tile we wanted, build
-      our finishied product and notify our client
+      our finishied product and notify our client. If we've already received this tile because
+      it was requested twice for some reason (e.g. crazy zooming in/out) then let's just go ahead
+      and delete the new version and go about our day.
     */
     QMap<quint32, QImage *> * tiles = _pendingTiles.value(cacheID);
+    if (tiles->contains(tileSourceIndex))
+    {
+        delete tile;
+        return;
+    }
     tiles->insert(tileSourceIndex,tile);
 
     //Still waiting for a tile or two?

@@ -161,6 +161,7 @@ public slots:
 
 private slots:
     void startTileRequest(quint32 x, quint32 y, quint8 z);
+    void clearTempCache();
 
 protected:
     /**
