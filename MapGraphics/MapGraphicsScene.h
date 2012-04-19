@@ -39,7 +39,7 @@ signals:
     void objectAdded(MapGraphicsObject *);
 
     /**
-     * @brief Fired when a MapGraphicsObject is removed from the scene
+     * @brief Fired when a MapGraphicsObject is removed from the scene.
      *
      * @param the object that was removed
      */

@@ -141,7 +141,14 @@ void MapGraphicsView::setScene(MapGraphicsScene * scene)
       Create New Stuff
     */
     //Create a private QGraphicsScene that our (also private) QGraphicsView will use
-    PrivateQGraphicsScene * childScene = new PrivateQGraphicsScene(scene,this);
+    PrivateQGraphicsScene * childScene = new PrivateQGraphicsScene(scene,
+                                                                   this,
+                                                                   this);
+    //The QGraphicsScene needs to know when our zoom level changes so it can notify objects
+    connect(this,
+            SIGNAL(zoomLevelChanged(quint8)),
+            childScene,
+            SLOT(handleZoomLevelChanged()));
 
     //Create a QGraphicsView that handles drawing for us
     PrivateQGraphicsView * childView = new PrivateQGraphicsView(childScene,this);
@@ -228,7 +235,12 @@ void MapGraphicsView::setZoomLevel(quint8 nZoom, ZoomMode zMode)
     QPointF offset = mousePoint - centerPos;
 
     //Change the zoom level
-    _zoomLevel = qMin(_tileSource->maxZoomLevel(),qMax(_tileSource->minZoomLevel(),nZoom));
+    nZoom = qMin(_tileSource->maxZoomLevel(),qMax(_tileSource->minZoomLevel(),nZoom));
+
+    if (nZoom == _zoomLevel)
+        return;
+
+    _zoomLevel = nZoom;
 
     //Disable all tile display temporarily. They'll redisplay properly when the timer ticks
     foreach(MapTileGraphicsObject * tileObject, _tileObjects)
@@ -247,6 +259,9 @@ void MapGraphicsView::setZoomLevel(quint8 nZoom, ZoomMode zMode)
         _childView->centerOn(mousePoint);
     else
         this->centerOn(centerGeoPos);
+
+    //Make MapGraphicsObjects update
+    this->zoomLevelChanged(nZoom);
 }
 
 void MapGraphicsView::zoomIn(ZoomMode zMode)

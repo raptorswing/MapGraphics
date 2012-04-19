@@ -2,8 +2,10 @@
 
 #include <QtDebug>
 
-PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene,QObject *parent) :
-    QGraphicsScene(parent)
+PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene,
+                                             PrivateQGraphicsInfoSource *infoSource,
+                                             QObject *parent) :
+    QGraphicsScene(parent), _infoSource(infoSource)
 {
     this->setMapGraphicsScene(mgScene);
 }
@@ -11,7 +13,7 @@ PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene,QObject 
 //private slot
 void PrivateQGraphicsScene::handleMGObjectAdded(MapGraphicsObject * added)
 {
-    PrivateQGraphicsObject * qgObj = new PrivateQGraphicsObject(added);
+    PrivateQGraphicsObject * qgObj = new PrivateQGraphicsObject(added,_infoSource);
     this->addItem(qgObj);
 
     //We need a mapping of MapGraphicsObject : QGraphicsObject, so put this in the map
@@ -30,6 +32,12 @@ void PrivateQGraphicsScene::handleMGObjectRemoved(MapGraphicsObject * removed)
     PrivateQGraphicsObject * qgObj = _mgToqg.take(removed);
     this->removeItem(qgObj);
     delete qgObj;
+}
+
+void PrivateQGraphicsScene::handleZoomLevelChanged()
+{
+    foreach(PrivateQGraphicsObject * obj, _mgToqg.values())
+        obj->handleZoomLevelChanged();
 }
 
 //private

@@ -7,6 +7,7 @@
 #include "tileSources/OSMTileSource.h"
 #include "tileSources/CompositeTileSource.h"
 #include "guts/CompositeTileSourceConfigurationWidget.h"
+#include "CircleObject.h"
 
 #include <QSharedPointer>
 #include <QtDebug>
@@ -40,6 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
                                                                                          this->ui->dockWidget);
     this->ui->dockWidget->setWidget(tileConfigWidget);
     delete this->ui->dockWidgetContents;
+
+    CircleObject * circle = new CircleObject();
+    scene->addObject(circle);
+    circle->setPos(QPointF(-111.0,41.0));
 }
 
 MainWindow::~MainWindow()

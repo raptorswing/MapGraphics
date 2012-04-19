@@ -27,7 +27,9 @@ SOURCES += MapGraphicsScene.cpp \
     guts/SQLiteKeyValueStore.cpp \
     guts/MapTileLayerListModel.cpp \
     guts/MapTileSourceDelegate.cpp \
-    guts/CompositeTileSourceConfigurationWidget.cpp
+    guts/CompositeTileSourceConfigurationWidget.cpp \
+    CircleObject.cpp \
+    guts/PrivateQGraphicsInfoSource.cpp
 
 HEADERS += MapGraphicsScene.h\
         MapGraphics_global.h \
@@ -46,7 +48,9 @@ HEADERS += MapGraphicsScene.h\
     guts/SQLiteKeyValueStore.h \
     guts/MapTileLayerListModel.h \
     guts/MapTileSourceDelegate.h \
-    guts/CompositeTileSourceConfigurationWidget.h
+    guts/CompositeTileSourceConfigurationWidget.h \
+    CircleObject.h \
+    guts/PrivateQGraphicsInfoSource.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

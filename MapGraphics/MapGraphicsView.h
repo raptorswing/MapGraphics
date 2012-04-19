@@ -12,9 +12,11 @@
 #include "MapGraphicsObject.h"
 #include "MapTileSource.h"
 #include "MapGraphics_global.h"
-#include "guts/MapTileGraphicsObject.h"
 
-class MAPGRAPHICSSHARED_EXPORT MapGraphicsView : public QWidget
+#include "guts/MapTileGraphicsObject.h"
+#include "guts/PrivateQGraphicsInfoSource.h"
+
+class MAPGRAPHICSSHARED_EXPORT MapGraphicsView : public QWidget, public PrivateQGraphicsInfoSource
 {
     Q_OBJECT
 public:
@@ -47,7 +49,9 @@ public:
     MapGraphicsScene * scene() const;
     void setScene(MapGraphicsScene *);
 
+    //pure-virtual from PrivateQGraphicsInfoSource
     QSharedPointer<MapTileSource> tileSource() const;
+
     /**
      * @brief Sets the tile source that this view will pull from.
      * MapGraphicsView does NOT take ownership of the tile source.
@@ -56,6 +60,7 @@ public:
      */
     void setTileSource(QSharedPointer<MapTileSource> tSource);
 
+    //pure-virtual from PrivateQGraphicsInfoSource
     quint8 zoomLevel() const;
     void setZoomLevel(quint8 nZoom, ZoomMode zMode = CenterZoom);
 
@@ -63,6 +68,7 @@ public:
     void zoomOut(ZoomMode zMode = CenterZoom);
     
 signals:
+    void zoomLevelChanged(quint8 nZoom);
     
 public slots:
 
