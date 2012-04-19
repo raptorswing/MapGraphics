@@ -2,9 +2,16 @@
 #include "ui_MainWindow.h"
 
 #include "MapGraphicsView.h"
-#include "guts/MapGraphicsScene.h"
-#include "guts/MapInfoManager.h"
-#include "guts/MapQuestTileSource.h"
+#include "MapGraphicsScene.h"
+#include "tileSources/GridTileSource.h"
+#include "tileSources/OSMTileSource.h"
+#include "tileSources/CompositeTileSource.h"
+#include "guts/CompositeTileSourceConfigurationWidget.h"
+#include "CircleObject.h"
+
+#include <QSharedPointer>
+#include <QtDebug>
+#include <QThread>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,32 +19,32 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /*
-      Create a tile source that MapGraphics will use to fetch tiles.
-      In this case, we'll be using MapQuest's OSM tiles.
-    */
-    QSharedPointer<MapTileSource> tileSource(new MapQuestTileSource(MapQuestTileSource::OSM_TILES));
-
-    //Tell MapGraphics to use the tile source we've just created
-    MapInfoManager::getInstance()->setMapTileSource(tileSource);
-
-    /*
-      Create a MapGraphics scene.
-      Note that currently only one view can use a scene. Lame, I know.
-    */
+    //Setup the MapGraphics scene and view
     MapGraphicsScene * scene = new MapGraphicsScene(this);
+    MapGraphicsView * view = new MapGraphicsView(scene,this);
 
-    //Create the actual map widget, a MapGraphicsView
-    MapGraphicsView * view = new MapGraphicsView(this);
-
-    //Tell our view to use the scene!
-    view->setScene(scene);
-
-    //Set the view as our central widget
+    //The view will be our central widget
     this->setCentralWidget(view);
 
-    //Configure the view to allow panning the map by dragging the mouse
-    view->setDragMode(QGraphicsView::ScrollHandDrag);
+    //Setup some tile sources
+    QSharedPointer<OSMTileSource> osmTiles(new OSMTileSource(OSMTileSource::OSMTiles), &QObject::deleteLater);
+    QSharedPointer<OSMTileSource> aerialTiles(new OSMTileSource(OSMTileSource::MapQuestAerialTiles), &QObject::deleteLater);
+    QSharedPointer<GridTileSource> gridTiles(new GridTileSource(), &QObject::deleteLater);
+    QSharedPointer<CompositeTileSource> composite(new CompositeTileSource(), &QObject::deleteLater);
+    composite->addSourceBottom(osmTiles,0.75);
+    composite->addSourceBottom(aerialTiles);
+    composite->addSourceTop(gridTiles);
+    view->setTileSource(composite);
+
+    //Create a widget in the dock that lets us configure tile source layers
+    CompositeTileSourceConfigurationWidget * tileConfigWidget = new CompositeTileSourceConfigurationWidget(composite.toWeakRef(),
+                                                                                         this->ui->dockWidget);
+    this->ui->dockWidget->setWidget(tileConfigWidget);
+    delete this->ui->dockWidgetContents;
+
+    CircleObject * circle = new CircleObject();
+    scene->addObject(circle);
+    circle->setPos(QPointF(-111.0,41.0));
 }
 
 MainWindow::~MainWindow()

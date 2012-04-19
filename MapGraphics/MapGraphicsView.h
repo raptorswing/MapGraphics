@@ -1,95 +1,100 @@
-#ifndef MapGraphicsView_H
-#define MapGraphicsView_H
+#ifndef MAPGRAPHICSVIEW_H
+#define MAPGRAPHICSVIEW_H
 
 #include <QWidget>
 #include <QPointer>
+#include <QSharedPointer>
 #include <QGraphicsView>
-#include <QTimer>
+#include <QGraphicsScene>
+#include <QList>
 
-#include "guts/MapGraphics_global.h"
-#include "guts/MapGraphicsScene.h"
-#include "MapGraphicsItem.h"
-#include "CompassWidget.h"
-#include "ZoomWidget.h"
+#include "MapGraphicsScene.h"
+#include "MapGraphicsObject.h"
+#include "MapTileSource.h"
+#include "MapGraphics_global.h"
 
+#include "guts/MapTileGraphicsObject.h"
+#include "guts/PrivateQGraphicsInfoSource.h"
 
-namespace Ui {
-    class MapGraphicsView;
-}
-
-class MAPGRAPHICSSHARED_EXPORT MapGraphicsView : public QWidget
+class MAPGRAPHICSSHARED_EXPORT MapGraphicsView : public QWidget, public PrivateQGraphicsInfoSource
 {
     Q_OBJECT
-
-//Enum Zone
 public:
-    enum EdgeMouseMode
+    enum DragMode
     {
-        IgnoreEdges,
-        ScrollNearEdges,
-        ScrollNearAndBeyondEdges
+        NoDrag,
+        ScrollHandDrag,
+        RubberBandDrag
     };
 
-    enum ZoomCenterMode
+    enum ZoomMode
     {
-        PreserveCenter,
-        FollowMouse
+        CenterZoom,
+        MouseZoom
     };
 
-//Function zone
 public:
-    explicit MapGraphicsView(QWidget *parent = 0);
+    explicit MapGraphicsView(MapGraphicsScene * scene=0, QWidget * parent = 0);
     virtual ~MapGraphicsView();
 
-    QGraphicsView * qGraphicsView() const;
+    void centerOn(const QPointF& pos);
+    void centerOn(qreal longitude, qreal latitude);
+    void centerOn(const MapGraphicsObject * item);
 
-    void centerOn(const QPointF & pos);
-    void centerOn(qreal x, qreal y);
-    void centerOn(const MapGraphicsItem * item);
+    QPointF mapToScene(const QPoint viewPos) const;
 
-    void setScene(MapGraphicsScene * scene);
+    MapGraphicsView::DragMode dragMode() const;
+    void setDragMode(MapGraphicsView::DragMode);
+
     MapGraphicsScene * scene() const;
+    void setScene(MapGraphicsScene *);
 
-    QGraphicsView::DragMode dragMode() const;
-    void setDragMode(QGraphicsView::DragMode mode);
+    //pure-virtual from PrivateQGraphicsInfoSource
+    QSharedPointer<MapTileSource> tileSource() const;
 
-    EdgeMouseMode edgeMouseMode() const;
-    void setEdgeMouseMode(EdgeMouseMode mode);
+    /**
+     * @brief Sets the tile source that this view will pull from.
+     * MapGraphicsView does NOT take ownership of the tile source.
+     *
+     * @param tSource
+     */
+    void setTileSource(QSharedPointer<MapTileSource> tSource);
 
-    QPoint mapFromScene(const QPointF& point) const;
-    QPointF mapToScene(const QPoint& point) const;
+    //pure-virtual from PrivateQGraphicsInfoSource
+    quint8 zoomLevel() const;
+    void setZoomLevel(quint8 nZoom, ZoomMode zMode = CenterZoom);
 
-public slots:
-    void rotate(qreal angle);
-    void zoomIn(ZoomCenterMode mode);
-    void zoomOut(ZoomCenterMode mode);
-    void setZoom(int level,ZoomCenterMode mode = PreserveCenter);
-
+    void zoomIn(ZoomMode zMode = CenterZoom);
+    void zoomOut(ZoomMode zMode = CenterZoom);
+    
 signals:
-    void geometryChanged(QRect);
-
-protected:
+    void zoomLevelChanged(quint8 nZoom);
+    
+public slots:
 
 protected slots:
-    virtual void on_graphicsView_hadMousePressEvent(QMouseEvent *);
-    virtual void on_graphicsView_hadMouseReleaseEvent(QMouseEvent *);
-    virtual void on_graphicsView_hadResizeEvent(QResizeEvent *);
-    virtual void on_graphicsView_hadWheelEvent(QWheelEvent *);
-
+    virtual void handleChildViewScrollWheel(QWheelEvent * event);
 
 private slots:
-    void ensureStuffDisplayed();
-    void doEdgeMouseScrolling();
+    void renderTiles();
+
+protected:
+    void doTileLayout();
+    void resetQGSSceneSize();
 
 private:
-    Ui::MapGraphicsView *ui;
-    QPointer<MapGraphicsScene> mapGraphicsScene;
+    QPointer<MapGraphicsScene> _scene;
+    QPointer<QGraphicsView> _childView;
+    QPointer<QGraphicsScene> _childScene;
+    QSharedPointer<MapTileSource> _tileSource;
 
-    CompassWidget * compassWidget;
-    ZoomWidget * zoomWidget;
+    QSet<MapTileGraphicsObject *> _tileObjects;
 
-    EdgeMouseMode currentEdgeMouseMode;
-    QTimer * edgeMouseDetectionTimer;
+    quint8 _zoomLevel;
+
+    DragMode _dragMode;
+
+    
 };
 
-#endif // MapGraphicsView_H
+#endif // MAPGRAPHICSVIEW_H

@@ -1,48 +1,60 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2011-09-30T13:47:16
+# Project created by QtCreator 2012-03-03T10:50:47
 #
 #-------------------------------------------------
 
-QT       += network gui core
+QT       += network sql
 
 TARGET = MapGraphics
 TEMPLATE = lib
 
 DEFINES += MAPGRAPHICS_LIBRARY
 
-SOURCES += guts/MGNetworkManager.cpp \
-    guts/MapGraphicsScene.cpp \
-    guts/PrivateQGraphicsView.cpp \
+SOURCES += MapGraphicsScene.cpp \
+    MapGraphicsObject.cpp \
     MapGraphicsView.cpp \
-    guts/MapTileGraphicsItem.cpp \
-    guts/MapInfoManager.cpp \
-    guts/MapTileSource.cpp \
-    guts/MapQuestTileSource.cpp \
-    MapGraphicsItem.cpp \
-    CompassWidget.cpp \
-    guts/PrivateQGraphicsItem.cpp \
-    guts/PrivateQGraphicsItemParent.cpp \
-    ZoomWidget.cpp
+    guts/PrivateQGraphicsScene.cpp \
+    guts/PrivateQGraphicsObject.cpp \
+    guts/Conversions.cpp \
+    MapTileSource.cpp \
+    tileSources/GridTileSource.cpp \
+    guts/MapTileGraphicsObject.cpp \
+    guts/PrivateQGraphicsView.cpp \
+    tileSources/OSMTileSource.cpp \
+    guts/MapGraphicsNetwork.cpp \
+    tileSources/CompositeTileSource.cpp \
+    guts/SQLiteKeyValueStore.cpp \
+    guts/MapTileLayerListModel.cpp \
+    guts/MapTileSourceDelegate.cpp \
+    guts/CompositeTileSourceConfigurationWidget.cpp \
+    CircleObject.cpp \
+    guts/PrivateQGraphicsInfoSource.cpp
 
-HEADERS += guts/MGNetworkManager.h\
-        guts/MapGraphics_global.h \
-    guts/MapGraphicsScene.h \
-    guts/PrivateQGraphicsView.h \
+HEADERS += MapGraphicsScene.h\
+        MapGraphics_global.h \
+    MapGraphicsObject.h \
     MapGraphicsView.h \
-    MapGraphicsItem.h \
-    guts/MapTileGraphicsItem.h \
-    guts/MapInfoManager.h \
-    guts/MapTileSource.h \
-    guts/MapQuestTileSource.h \
-    CompassWidget.h \
-    guts/PrivateQGraphicsItem.h \
-    guts/PrivateQGraphicsItemParent.h \
-    ZoomWidget.h
+    guts/PrivateQGraphicsScene.h \
+    guts/PrivateQGraphicsObject.h \
+    guts/Conversions.h \
+    MapTileSource.h \
+    tileSources/GridTileSource.h \
+    guts/MapTileGraphicsObject.h \
+    guts/PrivateQGraphicsView.h \
+    tileSources/OSMTileSource.h \
+    guts/MapGraphicsNetwork.h \
+    tileSources/CompositeTileSource.h \
+    guts/SQLiteKeyValueStore.h \
+    guts/MapTileLayerListModel.h \
+    guts/MapTileSourceDelegate.h \
+    guts/CompositeTileSourceConfigurationWidget.h \
+    CircleObject.h \
+    guts/PrivateQGraphicsInfoSource.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
-    TARGET.UID3 = 0xE47F7904
+    TARGET.UID3 = 0xE4F7F973
     TARGET.CAPABILITY = 
     TARGET.EPOCALLOWDLLDATA = 1
     addFiles.sources = MapGraphics.dll
@@ -59,39 +71,5 @@ unix:!symbian {
     INSTALLS += target
 }
 
-FORMS += MapGraphicsView.ui
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+FORMS += \
+    guts/CompositeTileSourceConfigurationWidget.ui
