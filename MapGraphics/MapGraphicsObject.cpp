@@ -3,7 +3,8 @@
 #include <QtDebug>
 #include <QKeyEvent>
 
-MapGraphicsObject::MapGraphicsObject(MapGraphicsObject *parent)
+MapGraphicsObject::MapGraphicsObject(bool sizeIsZoomInvariant, MapGraphicsObject *parent) :
+    _sizeIsZoomInvariant(sizeIsZoomInvariant)
 {
     //Set default properties and the parent that was passed as argument
     _enabled = true;
@@ -18,6 +19,11 @@ MapGraphicsObject::MapGraphicsObject(MapGraphicsObject *parent)
 
 MapGraphicsObject::~MapGraphicsObject()
 {
+}
+
+bool MapGraphicsObject::sizeIsZoomInvariant() const
+{
+    return _sizeIsZoomInvariant;
 }
 
 bool MapGraphicsObject::enabled() const

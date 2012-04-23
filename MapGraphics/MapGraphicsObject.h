@@ -26,16 +26,18 @@ public:
     //PrivateQGraphicsObject will call some of our protected event handlers that nobody else needs to touch
     friend class PrivateQGraphicsObject;
 public:
-    explicit MapGraphicsObject(MapGraphicsObject *parent = 0);
+    explicit MapGraphicsObject(bool sizeIsZoomInvariant=false,MapGraphicsObject *parent = 0);
     virtual ~MapGraphicsObject();
 
-    /**
-     * @brief You must implement this to return the bounding rect of the object in East,North,Up (ENU)
-     * coordinates
-     * centered at the pos() of the Object. The units of the rectangle are meters.
-     *
-     * @return QRectF Bounding rectangle in ENU coordinates. Unit: meters
-     */
+    bool sizeIsZoomInvariant() const;
+
+    /*!
+     \brief You need to implement this. If sizeIsZoomInvariant() is true, this should return the size of the
+     rectangle you want in PIXELS. If false, this should return the size of the rectangle in METERS. The
+     rectangle should be centered at (0,0) regardless.
+
+     \return QRectF
+    */
     virtual QRectF boundingRect() const=0;
 
     /**
@@ -112,6 +114,8 @@ signals:
 public slots:
 
 private:
+    bool _sizeIsZoomInvariant;
+
     bool _enabled;
     qreal _opacity;
     MapGraphicsObject * _parent;

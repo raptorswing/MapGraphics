@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->dockWidget->setWidget(tileConfigWidget);
     delete this->ui->dockWidgetContents;
 
-    CircleObject * circle = new CircleObject(50000);
+    CircleObject * circle = new CircleObject(8);
     scene->addObject(circle);
     circle->setPos(QPointF(-111.0,41.0));
 }

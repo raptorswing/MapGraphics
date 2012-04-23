@@ -28,7 +28,11 @@ QRectF PrivateQGraphicsObject::boundingRect() const
         return toRet;
     }
 
-    //Get bounding rect in ENU
+    //If the object's size is zoom invariant (e.g., labels or markers) then assume the rect's units are pixels
+    if (_mgObj->sizeIsZoomInvariant())
+        return _mgObj->boundingRect();
+
+    //Otherwise, assume they're meters and do some conversions!
     QRectF enuRect = _mgObj->boundingRect();
 
     //Convert from ENU to lat/lon
@@ -75,20 +79,26 @@ void PrivateQGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphics
         return;
     }
 
-    //Transform painter coordinates to ENU and then have the MapGraphicsObject do its thing
-    QRectF enuRect = _mgObj->boundingRect();
-    qreal desiredWidthMeters = enuRect.width();
-    qreal desiredHeightMeters = enuRect.height();
-    QRectF pixelRect = this->boundingRect();
-    qreal widthPixels = pixelRect.width();
-    qreal heightPixels = pixelRect.height();
-
-    qreal scaleX = widthPixels / desiredWidthMeters;
-    qreal scaleY = heightPixels / desiredHeightMeters;
-
     painter->save();
-    painter->scale(scaleX,scaleY);
+
+    //Transform painter coordinates to the object's bounding box and then have the MapGraphicsObject do its thing
+    if (!_mgObj->sizeIsZoomInvariant())
+    {
+        QRectF enuRect = _mgObj->boundingRect();
+        qreal desiredWidthMeters = enuRect.width();
+        qreal desiredHeightMeters = enuRect.height();
+        QRectF pixelRect = this->boundingRect();
+        qreal widthPixels = pixelRect.width();
+        qreal heightPixels = pixelRect.height();
+
+        qreal scaleX = widthPixels / desiredWidthMeters;
+        qreal scaleY = heightPixels / desiredHeightMeters;
+
+        painter->scale(scaleX,scaleY);
+    }
+
     _mgObj->paint(painter,option,widget);
+
     painter->restore();
 
     if (this->isSelected())
@@ -261,7 +271,7 @@ void PrivateQGraphicsObject::handlePosChanged()
     //Get the position of the object in lat,lon,alt
     QPointF geoPos = _mgObj->pos();
 
-    //If the object has a parent, do stupid stuff here to handle it
+    //TODO:If the object has a parent, do stupid stuff here to handle it
 
     //Convert LLA coordinates to QGraphicsScene coordinates
     QSharedPointer<MapTileSource> tileSource = _infoSource->tileSource();
@@ -270,7 +280,15 @@ void PrivateQGraphicsObject::handlePosChanged()
 
     int zoomLevel = _infoSource->zoomLevel();
     QPointF qgsPos = tileSource->ll2qgs(geoPos,zoomLevel);
+
+    /*
+      We disable the position change notifications to itemChange() before calling setPos so that
+      itemChange() doesn't cause another change to geoPos. i.e., it isn't treated as if the object
+      has been moved by the mouse. Don't think about it too much.
+    */
+    this->setFlag(QGraphicsObject::ItemSendsScenePositionChanges,false);
     this->setPos(qgsPos);
+    this->setFlag(QGraphicsObject::ItemSendsScenePositionChanges,true);
 }
 
 //private slot
