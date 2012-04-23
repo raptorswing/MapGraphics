@@ -6,12 +6,17 @@
 #include <QRectF>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QGraphicsItem>
 
 #include "MapGraphics_global.h"
 
 class MAPGRAPHICSSHARED_EXPORT MapGraphicsObject : public QObject
 {
     Q_OBJECT
+
+    //PrivateQGraphicsObject will call some of our protected event handlers that nobody else needs to touch
+    friend class PrivateQGraphicsObject;
 public:
     explicit MapGraphicsObject(MapGraphicsObject *parent = 0);
     virtual ~MapGraphicsObject();
@@ -62,6 +67,20 @@ public:
     qreal zValue() const;
     void setZValue(qreal);
 
+    bool isSelected() const;
+    void setSelected(bool);
+
+protected:
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent * event);
+    virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value);
+    virtual void keyPressEvent(QKeyEvent * event);
+    virtual void keyReleaseEvent(QKeyEvent * event);
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * event);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
+    virtual void wheelEvent(QGraphicsSceneWheelEvent * event);
+
     
 signals:
     void enabledChanged();
@@ -70,7 +89,10 @@ signals:
     void posChanged();
     void rotationChanged();
     void visibleChanged();
-    void zValueChangd();
+    void zValueChanged();
+
+    //Please do not use this. It should only be used internally for now. Ugly, I know.
+    void selectedChanged();
 
     
 public slots:
@@ -83,6 +105,7 @@ private:
     qreal _rotation;
     bool _visible;
     qreal _zValue;
+    bool _selected;
     
 };
 

@@ -21,6 +21,38 @@ public:
 
     //pure-virtual from QGraphicsItem
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    //override from QGraphicsItem
+    void setSelected(bool selected);
+
+protected:
+    //virtual from QGraphicsItem
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+
+    //virtual from QGraphicsItem
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+    //virtual from QGraphicsItem
+    virtual void keyPressEvent(QKeyEvent *event);
+
+    //virtual from QGraphicsItem
+    virtual void keyReleaseEvent(QKeyEvent *event);
+
+    //virtual from QGraphicsItem
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+
+    //virtual from QGraphicsItem
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+
+    //virtual from QGraphicsItem
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+
+    //virtual from QGraphicsItem
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
+    //virtual from QGraphicsItem
+    virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
+
     
 signals:
     
@@ -34,8 +66,9 @@ private slots:
     void handlePosChanged();
     void handleRotationChanged();
     void handleVisibleChanged();
-    void handleZValueChangd();
-    void updateAll();
+    void handleZValueChanged();
+    void handleMGSelectedChanged();
+    void updateAllFromMG();
 
 
 private:

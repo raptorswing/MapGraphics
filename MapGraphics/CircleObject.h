@@ -8,7 +8,7 @@ class MAPGRAPHICSSHARED_EXPORT CircleObject : public MapGraphicsObject
 {
     Q_OBJECT
 public:
-    explicit CircleObject(MapGraphicsObject *parent = 0);
+    explicit CircleObject(qreal radiusMeters,MapGraphicsObject *parent = 0);
 
     //pure-virtual from MapGraphicsObject
     QRectF boundingRect() const;
@@ -19,6 +19,9 @@ public:
 signals:
     
 public slots:
+
+private:
+    qreal _radiusMeters;
     
 };
 

@@ -1,5 +1,8 @@
 #include "MapGraphicsObject.h"
 
+#include <QtDebug>
+#include <QKeyEvent>
+
 MapGraphicsObject::MapGraphicsObject(MapGraphicsObject *parent)
 {
     //Set default properties and the parent that was passed as argument
@@ -10,6 +13,7 @@ MapGraphicsObject::MapGraphicsObject(MapGraphicsObject *parent)
     _rotation = 0.0;
     _visible = true;
     _zValue = 0.0;
+    _selected = false;
 }
 
 MapGraphicsObject::~MapGraphicsObject()
@@ -110,5 +114,75 @@ qreal MapGraphicsObject::zValue() const
 void MapGraphicsObject::setZValue(qreal nZValue)
 {
     _zValue = nZValue;
-    this->zValueChangd();
+    this->zValueChanged();
+}
+
+bool MapGraphicsObject::isSelected() const
+{
+    return _selected;
+}
+
+void MapGraphicsObject::setSelected(bool sel)
+{
+    if (_selected == sel)
+        return;
+    _selected = sel;
+    this->selectedChanged();
+
+}
+
+//protected
+void MapGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
+{
+    event->ignore();
+}
+
+//protected
+QVariant MapGraphicsObject::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
+{
+    Q_UNUSED(change)
+    return value;
+}
+
+//protected
+void MapGraphicsObject::keyPressEvent(QKeyEvent *event)
+{
+    event->ignore();
+}
+
+//protected
+void MapGraphicsObject::keyReleaseEvent(QKeyEvent *event)
+{
+    event->ignore();
+}
+
+//protected
+void MapGraphicsObject::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    event->ignore();
+}
+
+//protected
+void MapGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    event->ignore();
+}
+
+//protected
+void MapGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    //The default is to accept this if we are selectable and/or movable
+    event->accept();
+}
+
+//protected
+void MapGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    event->ignore();
+}
+
+//protected
+void MapGraphicsObject::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+    event->ignore();
 }

@@ -28,6 +28,8 @@ private slots:
     void handleMGObjectRemoved(MapGraphicsObject *);
     void handleZoomLevelChanged();
 
+    void handleSelectionChanged();
+
 private:
     void setMapGraphicsScene(MapGraphicsScene * mgScene);
 

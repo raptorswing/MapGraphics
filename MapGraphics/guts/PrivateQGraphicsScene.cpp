@@ -1,6 +1,7 @@
 #include "PrivateQGraphicsScene.h"
 
 #include <QtDebug>
+#include <QSet>
 
 PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene,
                                              PrivateQGraphicsInfoSource *infoSource,
@@ -8,6 +9,11 @@ PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene,
     QGraphicsScene(parent), _infoSource(infoSource)
 {
     this->setMapGraphicsScene(mgScene);
+
+    connect(this,
+            SIGNAL(selectionChanged()),
+            this,
+            SLOT(handleSelectionChanged()));
 }
 
 //private slot
@@ -38,6 +44,21 @@ void PrivateQGraphicsScene::handleZoomLevelChanged()
 {
     foreach(PrivateQGraphicsObject * obj, _mgToqg.values())
         obj->handleZoomLevelChanged();
+}
+
+void PrivateQGraphicsScene::handleSelectionChanged()
+{
+    QList<QGraphicsItem *> selectedList = this->selectedItems();
+    QSet<QGraphicsItem *> selected;
+    foreach(QGraphicsItem * item, selectedList)
+        selected.insert(item);
+
+    foreach(PrivateQGraphicsObject * obj, _mgToqg.values())
+    {
+        QGraphicsItem * casted = (QGraphicsItem *) obj;
+        obj->setSelected(selected.contains(casted));
+    }
+
 }
 
 //private

@@ -1,6 +1,7 @@
 #include "PrivateQGraphicsObject.h"
 
 #include <QtDebug>
+#include <QKeyEvent>
 
 #include "guts/Conversions.h"
 
@@ -11,6 +12,9 @@ PrivateQGraphicsObject::PrivateQGraphicsObject(MapGraphicsObject *mgObj,
 {
     this->setMGObj(mgObj);
     this->setZValue(5.0);
+
+    this->setFlag(QGraphicsItem::ItemIsMovable,true);
+    this->setFlag(QGraphicsItem::ItemIsSelectable,true);
 }
 
 //pure-virtual from QGraphicsItem
@@ -83,9 +87,133 @@ void PrivateQGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphics
 
     painter->scale(scaleX,scaleY);
 
+    if (this->isSelected())
+        painter->fillRect(enuRect,Qt::red);
+
     _mgObj->paint(painter,option,widget);
 }
 
+//override from QGraphicsItem
+void PrivateQGraphicsObject::setSelected(bool selected)
+{
+    qDebug() << "Selected:" << selected;
+    QGraphicsItem::setSelected(selected);
+
+    //Tell the MapGraphicsObject that we represent about it
+    _mgObj->setSelected(this->isSelected());
+}
+
+//protected
+void PrivateQGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    _mgObj->contextMenuEvent(event);
+
+    if (!event->isAccepted())
+        QGraphicsObject::contextMenuEvent(event);
+}
+
+//protected
+QVariant PrivateQGraphicsObject::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
+{
+    if (_mgObj.isNull())
+        return value;
+
+    return _mgObj->itemChange(change,value);
+}
+
+//protected
+void PrivateQGraphicsObject::keyPressEvent(QKeyEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    _mgObj->keyPressEvent(event);
+
+    if (!event->isAccepted())
+        QGraphicsObject::keyPressEvent(event);
+}
+
+//protected
+void PrivateQGraphicsObject::keyReleaseEvent(QKeyEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    _mgObj->keyReleaseEvent(event);
+
+    if (!event->isAccepted())
+        QGraphicsObject::keyReleaseEvent(event);
+}
+
+//protected
+void PrivateQGraphicsObject::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    _mgObj->mouseDoubleClickEvent(event);
+
+    if (!event->isAccepted())
+        QGraphicsObject::mouseDoubleClickEvent(event);
+}
+
+//protected
+void PrivateQGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    QGraphicsObject::mouseMoveEvent(event);
+    return;
+
+    _mgObj->mouseMoveEvent(event);
+
+    qDebug() << "move" <<  event->isAccepted();
+
+    if (!event->isAccepted())
+        QGraphicsObject::mouseMoveEvent(event);
+}
+
+//protected
+void PrivateQGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    _mgObj->mousePressEvent(event);
+
+    if (!event->isAccepted())
+        QGraphicsObject::mousePressEvent(event);
+}
+
+//protected
+void PrivateQGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    _mgObj->mouseReleaseEvent(event);
+
+    if (!event->isAccepted())
+        QGraphicsObject::mouseReleaseEvent(event);
+}
+
+//protected
+void PrivateQGraphicsObject::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+    if (_mgObj.isNull())
+        return;
+
+    _mgObj->wheelEvent(event);
+
+    if (!event->isAccepted())
+        QGraphicsObject::wheelEvent(event);
+}
+
+//public slot
 void PrivateQGraphicsObject::handleZoomLevelChanged()
 {
     this->handlePosChanged();
@@ -140,13 +268,25 @@ void PrivateQGraphicsObject::handleVisibleChanged()
 }
 
 //private slot
-void PrivateQGraphicsObject::handleZValueChangd()
+void PrivateQGraphicsObject::handleZValueChanged()
 {
     this->setZValue(_mgObj->zValue());
 }
 
 //private slot
-void PrivateQGraphicsObject::updateAll()
+void PrivateQGraphicsObject::handleMGSelectedChanged()
+{
+    if (_mgObj->isSelected() == this->isSelected())
+        return;
+
+    this->setSelected(_mgObj->isSelected());
+    _mgObj->_selected = this->isSelected();
+
+    this->update();
+}
+
+//private slot
+void PrivateQGraphicsObject::updateAllFromMG()
 {
     this->handleEnabledChanged();
     this->handleOpacityChanged();
@@ -154,7 +294,8 @@ void PrivateQGraphicsObject::updateAll()
     this->handlePosChanged();
     this->handleRotationChanged();
     this->handleVisibleChanged();
-    this->handleZValueChangd();
+    this->handleZValueChanged();
+    this->handleMGSelectedChanged();
 }
 
 //private
@@ -191,10 +332,14 @@ void PrivateQGraphicsObject::setMGObj(MapGraphicsObject * mgObj)
             this,
             SLOT(handleVisibleChanged()));
     connect(_mgObj,
-            SIGNAL(zValueChangd()),
+            SIGNAL(zValueChanged()),
             this,
-            SLOT(handleZValueChangd()));
+            SLOT(handleZValueChanged()));
+    connect(_mgObj,
+            SIGNAL(selectedChanged()),
+            this,
+            SLOT(handleMGSelectedChanged()));
 
     //Get all of the info about the MGObject
-    this->updateAll();
+    this->updateAllFromMG();
 }

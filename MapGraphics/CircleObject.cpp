@@ -1,19 +1,28 @@
 #include "CircleObject.h"
 
-CircleObject::CircleObject(MapGraphicsObject *parent) :
+CircleObject::CircleObject(qreal radiusMeters,MapGraphicsObject *parent) :
     MapGraphicsObject(parent)
 {
+    _radiusMeters = qMax<qreal>(radiusMeters,0.01);
 }
 
 QRectF CircleObject::boundingRect() const
 {
-    return QRectF(-50,
-                  -50,
-                  100,
-                  100);
+    return QRectF(-1*_radiusMeters,
+                  -1*_radiusMeters,
+                  2*_radiusMeters,
+                  2*_radiusMeters);
 }
 
 void CircleObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->fillRect(this->boundingRect(),Qt::red);
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    painter->setRenderHint(QPainter::Antialiasing,true);
+    painter->drawEllipse(QPointF(0,0),
+                         _radiusMeters,
+                         _radiusMeters);
+
+    if (this->isSelected())
+        painter->drawRect(this->boundingRect());
 }
