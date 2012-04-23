@@ -68,6 +68,7 @@ private slots:
     void handleVisibleChanged();
     void handleZValueChanged();
     void handleMGSelectedChanged();
+    void handleMGFlagsChanged();
     void updateAllFromMG();
 
 

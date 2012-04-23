@@ -131,6 +131,27 @@ void MapGraphicsObject::setSelected(bool sel)
 
 }
 
+void MapGraphicsObject::setFlag(MapGraphicsObject::MapGraphicsObjectFlag flag, bool enabled)
+{
+    if (enabled)
+        _flags = _flags | flag;
+    else
+        _flags = _flags & (~flag);
+
+    this->flagsChanged();
+}
+
+void MapGraphicsObject::setFlags(MapGraphicsObject::MapGraphicsObjectFlags flags)
+{
+    _flags = flags;
+    this->flagsChanged();
+}
+
+MapGraphicsObject::MapGraphicsObjectFlags MapGraphicsObject::flags() const
+{
+    return _flags;
+}
+
 //protected
 void MapGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
 {
@@ -171,8 +192,12 @@ void MapGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 //protected
 void MapGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    //The default is to accept this if we are selectable and/or movable
-    event->accept();
+    //The default is to accept this if we are selectable and/or movable. Otherwise, ignore!
+    if (this->flags() & MapGraphicsObject::ObjectIsMovable
+            ||this->flags() & MapGraphicsObject::ObjectIsSelectable)
+        event->accept();
+    else
+        event->ignore();
 }
 
 //protected

@@ -4,6 +4,8 @@ CircleObject::CircleObject(qreal radiusMeters,MapGraphicsObject *parent) :
     MapGraphicsObject(parent)
 {
     _radiusMeters = qMax<qreal>(radiusMeters,0.01);
+
+    this->setFlag(MapGraphicsObject::ObjectIsSelectable);
 }
 
 QRectF CircleObject::boundingRect() const
@@ -22,7 +24,4 @@ void CircleObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->drawEllipse(QPointF(0,0),
                          _radiusMeters,
                          _radiusMeters);
-
-    if (this->isSelected())
-        painter->drawRect(this->boundingRect());
 }

@@ -15,6 +15,14 @@ class MAPGRAPHICSSHARED_EXPORT MapGraphicsObject : public QObject
 {
     Q_OBJECT
 
+public:
+    enum MapGraphicsObjectFlag
+    {
+        ObjectIsMovable = 0x01,
+        ObjectIsSelectable
+    };
+    Q_DECLARE_FLAGS(MapGraphicsObjectFlags,MapGraphicsObjectFlag)
+
     //PrivateQGraphicsObject will call some of our protected event handlers that nobody else needs to touch
     friend class PrivateQGraphicsObject;
 public:
@@ -70,6 +78,10 @@ public:
     bool isSelected() const;
     void setSelected(bool);
 
+    void setFlag(MapGraphicsObjectFlag, bool enabled=true);
+    void setFlags(MapGraphicsObject::MapGraphicsObjectFlags);
+    MapGraphicsObject::MapGraphicsObjectFlags flags() const;
+
 protected:
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent * event);
     virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value);
@@ -91,6 +103,8 @@ signals:
     void visibleChanged();
     void zValueChanged();
 
+    void flagsChanged();
+
     //Please do not use this. It should only be used internally for now. Ugly, I know.
     void selectedChanged();
 
@@ -106,7 +120,10 @@ private:
     bool _visible;
     qreal _zValue;
     bool _selected;
+
+    MapGraphicsObject::MapGraphicsObjectFlags _flags;
     
 };
+Q_DECLARE_OPERATORS_FOR_FLAGS(MapGraphicsObject::MapGraphicsObjectFlags)
 
 #endif // MAPGRAPHICSOBJECT_H

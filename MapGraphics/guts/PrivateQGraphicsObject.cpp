@@ -13,8 +13,8 @@ PrivateQGraphicsObject::PrivateQGraphicsObject(MapGraphicsObject *mgObj,
     this->setMGObj(mgObj);
     this->setZValue(5.0);
 
-    this->setFlag(QGraphicsItem::ItemIsMovable,true);
-    this->setFlag(QGraphicsItem::ItemIsSelectable,true);
+    //this->setFlag(QGraphicsItem::ItemIsMovable,true);
+    //this->setFlag(QGraphicsItem::ItemIsSelectable,true);
     this->setFlag(QGraphicsItem::ItemSendsScenePositionChanges,true);
 }
 
@@ -86,12 +86,13 @@ void PrivateQGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphics
     qreal scaleX = widthPixels / desiredWidthMeters;
     qreal scaleY = heightPixels / desiredHeightMeters;
 
+    painter->save();
     painter->scale(scaleX,scaleY);
+    _mgObj->paint(painter,option,widget);
+    painter->restore();
 
     if (this->isSelected())
-        painter->fillRect(enuRect,Qt::red);
-
-    _mgObj->paint(painter,option,widget);
+        painter->drawRect(this->boundingRect());
 }
 
 //override from QGraphicsItem
@@ -303,6 +304,24 @@ void PrivateQGraphicsObject::handleMGSelectedChanged()
 }
 
 //private slot
+void PrivateQGraphicsObject::handleMGFlagsChanged()
+{
+    MapGraphicsObject::MapGraphicsObjectFlags flags = _mgObj->flags();
+
+    bool movable = false;
+    bool selectable = false;
+
+    if (flags & MapGraphicsObject::ObjectIsMovable)
+        movable = true;
+
+    if (flags & MapGraphicsObject::ObjectIsSelectable)
+        selectable = true;
+
+    this->setFlag(QGraphicsObject::ItemIsMovable,movable);
+    this->setFlag(QGraphicsObject::ItemIsSelectable,selectable);
+}
+
+//private slot
 void PrivateQGraphicsObject::updateAllFromMG()
 {
     this->handleEnabledChanged();
@@ -313,6 +332,7 @@ void PrivateQGraphicsObject::updateAllFromMG()
     this->handleVisibleChanged();
     this->handleZValueChanged();
     this->handleMGSelectedChanged();
+    this->handleMGFlagsChanged();
 }
 
 //private
@@ -356,6 +376,10 @@ void PrivateQGraphicsObject::setMGObj(MapGraphicsObject * mgObj)
             SIGNAL(selectedChanged()),
             this,
             SLOT(handleMGSelectedChanged()));
+    connect(_mgObj,
+            SIGNAL(flagsChanged()),
+            this,
+            SLOT(handleMGFlagsChanged()));
 
     //Get all of the info about the MGObject
     this->updateAllFromMG();
