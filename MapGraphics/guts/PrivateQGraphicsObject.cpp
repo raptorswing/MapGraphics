@@ -15,6 +15,7 @@ PrivateQGraphicsObject::PrivateQGraphicsObject(MapGraphicsObject *mgObj,
 
     this->setFlag(QGraphicsItem::ItemIsMovable,true);
     this->setFlag(QGraphicsItem::ItemIsSelectable,true);
+    this->setFlag(QGraphicsItem::ItemSendsScenePositionChanges,true);
 }
 
 //pure-virtual from QGraphicsItem
@@ -96,7 +97,6 @@ void PrivateQGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphics
 //override from QGraphicsItem
 void PrivateQGraphicsObject::setSelected(bool selected)
 {
-    qDebug() << "Selected:" << selected;
     QGraphicsItem::setSelected(selected);
 
     //Tell the MapGraphicsObject that we represent about it
@@ -120,6 +120,23 @@ QVariant PrivateQGraphicsObject::itemChange(QGraphicsItem::GraphicsItemChange ch
 {
     if (_mgObj.isNull())
         return value;
+
+    //When the position changes as a result of user action we need to update the MapGraphicsObject's geo pos
+    if (change == QGraphicsItem::ItemPositionChange)
+    {
+        QPointF scenePos = value.toPointF();
+        QSharedPointer<MapTileSource> tileSource = _infoSource->tileSource();
+        if (!tileSource.isNull())
+        {
+            QPointF geoPos = tileSource->qgs2ll(scenePos,_infoSource->zoomLevel());
+
+            //Hackz
+            this->setFlag(QGraphicsItem::ItemSendsScenePositionChanges,false);
+            _mgObj->setPos(geoPos);
+            this->setFlag(QGraphicsItem::ItemSendsScenePositionChanges,true);
+        }
+
+    }
 
     return _mgObj->itemChange(change,value);
 }
