@@ -8,6 +8,7 @@
 #include "tileSources/CompositeTileSource.h"
 #include "guts/CompositeTileSourceConfigurationWidget.h"
 #include "CircleObject.h"
+#include "PolygonObject.h"
 
 #include <QSharedPointer>
 #include <QtDebug>
@@ -42,9 +43,17 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->dockWidget->setWidget(tileConfigWidget);
     delete this->ui->dockWidgetContents;
 
+    /*
     CircleObject * circle = new CircleObject(8);
     scene->addObject(circle);
     circle->setPos(QPointF(-111.0,41.0));
+    */
+
+    QPolygonF poly;
+    poly << QPointF(-111.0,41.0) << QPointF(-112.0,41.0) << QPointF(-111.5,40.0);
+    PolygonObject * polyObj = new PolygonObject(poly);
+    scene->addObject(polyObj);
+    //polyObj->setPos(poly.boundingRect().center());
 }
 
 MainWindow::~MainWindow()

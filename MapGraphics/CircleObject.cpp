@@ -1,5 +1,7 @@
 #include "CircleObject.h"
 
+#include <QtDebug>
+
 CircleObject::CircleObject(qreal radius,bool sizeIsZoomInvariant, MapGraphicsObject *parent) :
     MapGraphicsObject(sizeIsZoomInvariant,parent)
 {
@@ -7,6 +9,10 @@ CircleObject::CircleObject(qreal radius,bool sizeIsZoomInvariant, MapGraphicsObj
 
     this->setFlag(MapGraphicsObject::ObjectIsSelectable);
     this->setFlag(MapGraphicsObject::ObjectIsMovable);
+}
+
+CircleObject::~CircleObject()
+{
 }
 
 QRectF CircleObject::boundingRect() const
@@ -22,7 +28,7 @@ void CircleObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     Q_UNUSED(option)
     Q_UNUSED(widget)
     painter->setRenderHint(QPainter::Antialiasing,true);
-    painter->setBrush(Qt::red);
+    painter->setBrush(QColor(200,200,200,150));
     painter->drawEllipse(QPointF(0,0),
                          _radiusMeters,
                          _radiusMeters);

@@ -1,0 +1,41 @@
+#ifndef POLYGONOBJECT_H
+#define POLYGONOBJECT_H
+
+#include <QPolygonF>
+#include <QList>
+
+#include "MapGraphicsObject.h"
+#include "MapGraphics_global.h"
+class CircleObject;
+
+class MAPGRAPHICSSHARED_EXPORT PolygonObject : public MapGraphicsObject
+{
+    Q_OBJECT
+public:
+    explicit PolygonObject(QPolygonF geoPoly, QObject *parent = 0);
+    virtual ~PolygonObject();
+
+    //pure-virtual from MapGraphicsObject
+    QRectF boundingRect() const;
+
+    //pure-virtual from MapGraphicsObject
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    //virtual from MapGraphicsObject
+    virtual void setPos(const QPointF &);
+    
+signals:
+    
+public slots:
+
+private slots:
+    void handleEditCirclePosChanged();
+
+private:
+    QPolygonF _geoPoly;
+
+    QList<CircleObject *> _editCircles;
+    
+};
+
+#endif // POLYGONOBJECT_H

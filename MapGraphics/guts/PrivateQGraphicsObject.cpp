@@ -18,13 +18,17 @@ PrivateQGraphicsObject::PrivateQGraphicsObject(MapGraphicsObject *mgObj,
     this->setFlag(QGraphicsItem::ItemSendsScenePositionChanges,true);
 }
 
+PrivateQGraphicsObject::~PrivateQGraphicsObject()
+{
+}
+
 //pure-virtual from QGraphicsItem
 QRectF PrivateQGraphicsObject::boundingRect() const
 {
     QRectF toRet(-1.0,-1.0,2.0,2.0);
     if (_mgObj.isNull())
     {
-        qWarning() << this << "could not get bounding rect as MapGraphicsObject is null";
+        qWarning() << "Warning:" << this << "could not get bounding rect as MapGraphicsObject is null";
         return toRet;
     }
 
@@ -80,6 +84,7 @@ void PrivateQGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphics
     }
 
     painter->save();
+    painter->scale(1.0,-1.0);
 
     //Transform painter coordinates to the object's bounding box and then have the MapGraphicsObject do its thing
     if (!_mgObj->sizeIsZoomInvariant())
@@ -401,4 +406,9 @@ void PrivateQGraphicsObject::setMGObj(MapGraphicsObject * mgObj)
 
     //Get all of the info about the MGObject
     this->updateAllFromMG();
+
+    connect(mgObj,
+            SIGNAL(destroyed()),
+            this,
+            SLOT(deleteLater()));
 }

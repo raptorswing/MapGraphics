@@ -60,7 +60,7 @@ public:
     void setParent(MapGraphicsObject *);
 
     QPointF pos() const;
-    void setPos(const QPointF&);
+    virtual void setPos(const QPointF&);
 
     qreal rotation() const;
     void setRotation(qreal);
@@ -109,6 +109,8 @@ signals:
 
     //Please do not use this. It should only be used internally for now. Ugly, I know.
     void selectedChanged();
+
+    void newObjectGenerated(MapGraphicsObject *);
 
     
 public slots:

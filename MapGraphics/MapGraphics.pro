@@ -29,7 +29,8 @@ SOURCES += MapGraphicsScene.cpp \
     guts/MapTileSourceDelegate.cpp \
     guts/CompositeTileSourceConfigurationWidget.cpp \
     CircleObject.cpp \
-    guts/PrivateQGraphicsInfoSource.cpp
+    guts/PrivateQGraphicsInfoSource.cpp \
+    PolygonObject.cpp
 
 HEADERS += MapGraphicsScene.h\
         MapGraphics_global.h \
@@ -50,7 +51,8 @@ HEADERS += MapGraphicsScene.h\
     guts/MapTileSourceDelegate.h \
     guts/CompositeTileSourceConfigurationWidget.h \
     CircleObject.h \
-    guts/PrivateQGraphicsInfoSource.h
+    guts/PrivateQGraphicsInfoSource.h \
+    PolygonObject.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

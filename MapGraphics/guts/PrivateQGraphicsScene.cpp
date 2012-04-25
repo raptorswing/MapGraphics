@@ -3,6 +3,8 @@
 #include <QtDebug>
 #include <QSet>
 
+#include "MapGraphicsScene.h"
+
 PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene,
                                              PrivateQGraphicsInfoSource *infoSource,
                                              QObject *parent) :
@@ -31,13 +33,25 @@ void PrivateQGraphicsScene::handleMGObjectRemoved(MapGraphicsObject * removed)
 {
     if (!_mgToqg.contains(removed))
     {
-        qDebug() << "There is no QGraphicsObject in the scene for" << removed;
+        qWarning() << "There is no QGraphicsObject in the scene for" << removed;
         return;
     }
 
-    PrivateQGraphicsObject * qgObj = _mgToqg.take(removed);
+    _mgToqg.take(removed);
+
+    /*
+      It turns out that removing/deleting the PrivateQGraphicsObjects here was causing crashes.
+      Instead, the PrivateQGraphicsObject watches the MapGraphicsObject's destroyed signal to
+      delete itself. QGraphicsScene is smart enough to remove deleted objects in this case.
+    /*
+    if (!this->items().contains(qgObj))
+    {
+        qWarning() << this << "does not contain PrivateQGraphicsObject" << qgObj;
+        return;
+    }
     this->removeItem(qgObj);
-    delete qgObj;
+    //qgObj->deleteLater();
+    */
 }
 
 void PrivateQGraphicsScene::handleZoomLevelChanged()
@@ -67,13 +81,16 @@ void PrivateQGraphicsScene::setMapGraphicsScene(MapGraphicsScene *mgScene)
     _mgScene = mgScene;
 
     if (_mgScene.isNull())
+    {
+        qWarning() << this << "got a null MapGraphicsScene";
         return;
+    }
 
-    connect(_mgScene,
+    connect(_mgScene.data(),
             SIGNAL(objectAdded(MapGraphicsObject*)),
             this,
             SLOT(handleMGObjectAdded(MapGraphicsObject*)));
-    connect(_mgScene,
+    connect(_mgScene.data(),
             SIGNAL(objectRemoved(MapGraphicsObject*)),
             this,
             SLOT(handleMGObjectRemoved(MapGraphicsObject*)));

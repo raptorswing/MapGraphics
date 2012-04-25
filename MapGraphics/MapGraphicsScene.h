@@ -16,8 +16,7 @@ public:
     virtual ~MapGraphicsScene();
 
     /**
-     * @brief Adds or re-parents the given MapGraphicsObject to this scene. The scene takes ownership
-     * of the item and its children. (i.e., you should not delete them while they are still in the scene).
+     * @brief Adds or re-parents the given MapGraphicsObject to this scene.
      *
      * @param item
      */
@@ -29,6 +28,8 @@ public:
      * @return QList<MapGraphicsObject *>
      */
     QList<MapGraphicsObject *> objects() const;
+
+    void removeObject(MapGraphicsObject * object);
 
 signals:
     /**
@@ -44,6 +45,10 @@ signals:
      * @param the object that was removed
      */
     void objectRemoved(MapGraphicsObject *);
+
+private slots:
+    void handleNewObjectGenerated(MapGraphicsObject * newObject);
+    void handleObjectDestroyed(QObject * object);
 
 private:
     QSet<MapGraphicsObject *> _objects;

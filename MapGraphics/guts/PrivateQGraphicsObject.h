@@ -15,6 +15,7 @@ public:
     explicit PrivateQGraphicsObject(MapGraphicsObject * mgObj,
                                     PrivateQGraphicsInfoSource * infoSource,
                                     QGraphicsItem *parent = 0);
+    virtual ~PrivateQGraphicsObject();
 
     //pure-virtual from QGraphicsItem
     virtual QRectF boundingRect() const;
