@@ -19,8 +19,8 @@ public:
     enum MapGraphicsObjectFlag
     {
         ObjectIsMovable = 0x01,
-        ObjectIsSelectable = 0x04,
-        ObjectIsFocusable = 0x08
+        ObjectIsSelectable = 0x02,
+        ObjectIsFocusable = 0x04
     };
     Q_DECLARE_FLAGS(MapGraphicsObjectFlags,MapGraphicsObjectFlag)
 
@@ -113,6 +113,9 @@ signals:
 
     void newObjectGenerated(MapGraphicsObject *);
 
+    /*!
+     \brief Emitted when we'd like to be redrawn
+    */
     void redrawRequested();
 
     /*!
