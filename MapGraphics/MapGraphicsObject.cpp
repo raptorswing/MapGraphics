@@ -201,7 +201,11 @@ void MapGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
     //The default is to accept this if we are selectable and/or movable. Otherwise, ignore!
     if (this->flags() & MapGraphicsObject::ObjectIsMovable
             ||this->flags() & MapGraphicsObject::ObjectIsSelectable)
+    {
         event->accept();
+        if (this->flags() & MapGraphicsObject::ObjectIsFocusable)
+            this->keyFocusRequested();
+    }
     else
         event->ignore();
 }

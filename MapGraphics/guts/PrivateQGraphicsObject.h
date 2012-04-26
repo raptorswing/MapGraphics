@@ -72,6 +72,9 @@ private slots:
     void handleMGFlagsChanged();
     void updateAllFromMG();
 
+    void handleRedrawRequested();
+    void handleKeyFocusRequested();
+
 
 private:
     void setMGObj(MapGraphicsObject *);

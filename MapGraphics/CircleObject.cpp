@@ -2,10 +2,10 @@
 
 #include <QtDebug>
 
-CircleObject::CircleObject(qreal radius,bool sizeIsZoomInvariant, MapGraphicsObject *parent) :
-    MapGraphicsObject(sizeIsZoomInvariant,parent)
+CircleObject::CircleObject(qreal radius,bool sizeIsZoomInvariant, QColor fillColor, MapGraphicsObject *parent) :
+    MapGraphicsObject(sizeIsZoomInvariant,parent), _fillColor(fillColor)
 {
-    _radiusMeters = qMax<qreal>(radius,0.01);
+    _radius = qMax<qreal>(radius,0.01);
 
     this->setFlag(MapGraphicsObject::ObjectIsSelectable);
     this->setFlag(MapGraphicsObject::ObjectIsMovable);
@@ -17,10 +17,10 @@ CircleObject::~CircleObject()
 
 QRectF CircleObject::boundingRect() const
 {
-    return QRectF(-1*_radiusMeters,
-                  -1*_radiusMeters,
-                  2*_radiusMeters,
-                  2*_radiusMeters);
+    return QRectF(-1*_radius,
+                  -1*_radius,
+                  2*_radius,
+                  2*_radius);
 }
 
 void CircleObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -28,8 +28,8 @@ void CircleObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     Q_UNUSED(option)
     Q_UNUSED(widget)
     painter->setRenderHint(QPainter::Antialiasing,true);
-    painter->setBrush(QColor(200,200,200,150));
+    painter->setBrush(_fillColor);
     painter->drawEllipse(QPointF(0,0),
-                         _radiusMeters,
-                         _radiusMeters);
+                         _radius,
+                         _radius);
 }

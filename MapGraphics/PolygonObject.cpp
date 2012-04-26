@@ -4,17 +4,22 @@
 #include "CircleObject.h"
 
 #include <QtDebug>
+#include <QKeyEvent>
 
-PolygonObject::PolygonObject(QPolygonF geoPoly, QObject *parent) :
-    MapGraphicsObject(parent), _geoPoly(geoPoly)
+PolygonObject::PolygonObject(QPolygonF geoPoly, QColor fillColor, QObject *parent) :
+    MapGraphicsObject(parent), _geoPoly(geoPoly), _fillColor(fillColor)
 {
     this->setFlag(MapGraphicsObject::ObjectIsMovable);
     this->setFlag(MapGraphicsObject::ObjectIsSelectable);
+    this->setFlag(MapGraphicsObject::ObjectIsFocusable);
     this->setPos(_geoPoly.boundingRect().center());
 }
 
 PolygonObject::~PolygonObject()
 {
+    foreach(CircleObject * circle, _editCircles)
+        circle->deleteLater();
+    _editCircles.clear();
 }
 
 //pure-virtual from MapGraphicsObject
@@ -50,7 +55,7 @@ void PolygonObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
         enuPoly << enu;
     }
 
-    painter->setBrush(Qt::red);
+    painter->setBrush(_fillColor);
     painter->drawPolygon(enuPoly);
 
     if (_editCircles.isEmpty())
@@ -87,6 +92,19 @@ void PolygonObject::setPos(const QPointF & nPos)
     }
 
     MapGraphicsObject::setPos(nPos);
+}
+
+//protected
+//virtual from MapGraphicsObject
+void PolygonObject::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Delete))
+    {
+        this->deleteLater();
+        event->accept();
+    }
+    else
+        event->ignore();
 }
 
 //private slot

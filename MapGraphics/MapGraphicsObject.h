@@ -19,7 +19,8 @@ public:
     enum MapGraphicsObjectFlag
     {
         ObjectIsMovable = 0x01,
-        ObjectIsSelectable
+        ObjectIsSelectable,
+        ObjectIsFocusable
     };
     Q_DECLARE_FLAGS(MapGraphicsObjectFlags,MapGraphicsObjectFlag)
 
@@ -111,6 +112,13 @@ signals:
     void selectedChanged();
 
     void newObjectGenerated(MapGraphicsObject *);
+
+    void redrawRequested();
+
+    /*!
+     \brief Emitted when this MapGraphicsObject wants keyboard focus. (to receive keyboard events)
+    */
+    void keyFocusRequested();
 
     
 public slots:

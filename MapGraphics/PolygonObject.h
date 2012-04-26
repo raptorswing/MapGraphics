@@ -12,7 +12,7 @@ class MAPGRAPHICSSHARED_EXPORT PolygonObject : public MapGraphicsObject
 {
     Q_OBJECT
 public:
-    explicit PolygonObject(QPolygonF geoPoly, QObject *parent = 0);
+    explicit PolygonObject(QPolygonF geoPoly, QColor fillColor = QColor(200,200,200,200), QObject *parent = 0);
     virtual ~PolygonObject();
 
     //pure-virtual from MapGraphicsObject
@@ -28,11 +28,16 @@ signals:
     
 public slots:
 
+protected:
+    //virtual from MapGraphicsObject
+    virtual void keyReleaseEvent(QKeyEvent *event);
+
 private slots:
     void handleEditCirclePosChanged();
 
 private:
     QPolygonF _geoPoly;
+    QColor _fillColor;
 
     QList<CircleObject *> _editCircles;
     

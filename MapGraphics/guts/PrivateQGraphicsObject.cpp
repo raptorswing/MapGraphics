@@ -333,6 +333,7 @@ void PrivateQGraphicsObject::handleMGFlagsChanged()
 
     bool movable = false;
     bool selectable = false;
+    bool focusable = false;
 
     if (flags & MapGraphicsObject::ObjectIsMovable)
         movable = true;
@@ -340,8 +341,12 @@ void PrivateQGraphicsObject::handleMGFlagsChanged()
     if (flags & MapGraphicsObject::ObjectIsSelectable)
         selectable = true;
 
+    if (flags & MapGraphicsObject::ObjectIsFocusable)
+        focusable = true;
+
     this->setFlag(QGraphicsObject::ItemIsMovable,movable);
     this->setFlag(QGraphicsObject::ItemIsSelectable,selectable);
+    this->setFlag(QGraphicsObject::ItemIsFocusable,focusable);
 }
 
 //private slot
@@ -356,6 +361,18 @@ void PrivateQGraphicsObject::updateAllFromMG()
     this->handleZValueChanged();
     this->handleMGSelectedChanged();
     this->handleMGFlagsChanged();
+}
+
+//private slot
+void PrivateQGraphicsObject::handleRedrawRequested()
+{
+    this->update();
+}
+
+//private slot
+void PrivateQGraphicsObject::handleKeyFocusRequested()
+{
+    this->setFocus();
 }
 
 //private
@@ -403,6 +420,10 @@ void PrivateQGraphicsObject::setMGObj(MapGraphicsObject * mgObj)
             SIGNAL(flagsChanged()),
             this,
             SLOT(handleMGFlagsChanged()));
+    connect(mgObj,
+            SIGNAL(keyFocusRequested()),
+            this,
+            SLOT(handleKeyFocusRequested()));
 
     //Get all of the info about the MGObject
     this->updateAllFromMG();
