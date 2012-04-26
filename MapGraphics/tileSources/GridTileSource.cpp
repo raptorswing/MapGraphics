@@ -24,8 +24,8 @@ QPointF GridTileSource::ll2qgs(const QPointF &ll, quint8 zoomLevel) const
 {
     const qreal tilesOnOneEdge = pow(2.0,zoomLevel);
     const quint16 tileSize = this->tileSize();
-    qreal x = (ll.x()+180) * (tilesOnOneEdge*tileSize)/360; // coord to pixel!
-    qreal y = (1-(log(tan(PI/4+(ll.y()*deg2rad)/2)) /PI)) /2  * (tilesOnOneEdge*tileSize);
+    qreal x = (ll.x()+180.0) * (tilesOnOneEdge*tileSize)/360.0; // coord to pixel!
+    qreal y = (1-(log(tan(PI/4.0+(ll.y()*deg2rad)/2)) /PI)) /2.0  * (tilesOnOneEdge*tileSize);
 
     return QPoint(int(x), int(y));
 }
@@ -34,8 +34,8 @@ QPointF GridTileSource::qgs2ll(const QPointF &qgs, quint8 zoomLevel) const
 {
     const qreal tilesOnOneEdge = pow(2.0,zoomLevel);
     const quint16 tileSize = this->tileSize();
-    qreal longitude = (qgs.x()*(360/(tilesOnOneEdge*tileSize)))-180;
-    qreal latitude = rad2deg*(atan(sinh((1-qgs.y()*(2/(tilesOnOneEdge*tileSize)))*PI)));
+    qreal longitude = (qgs.x()*(360.0/(tilesOnOneEdge*tileSize)))-180.0;
+    qreal latitude = rad2deg*(atan(sinh((1.0-qgs.y()*(2.0/(tilesOnOneEdge*tileSize)))*PI)));
 
     return QPointF(longitude, latitude);
 }

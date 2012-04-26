@@ -68,7 +68,7 @@ Conversions::Position Conversions::xyz2lla(qreal x, qreal y, qreal z)
     qreal rhoerror = 1000.0;
     qreal zerror = 1000.0;
 
-    while (abs(rhoerror) > 0.00001 || abs(zerror) > 0.00001)
+    while (abs(rhoerror) > 0.000001 || abs(zerror) > 0.000001)
     {
         qreal slat = sin(templat);
         qreal clat = cos(templat);

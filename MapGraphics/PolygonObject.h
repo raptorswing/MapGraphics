@@ -34,12 +34,17 @@ protected:
 
 private slots:
     void handleEditCirclePosChanged();
+    void handleAddVertexCircleSelected();
 
 private:
+    void fixAddVertexCirclePos();
+    CircleObject * constructEditCircle();
+    CircleObject * constructAddVertexCircle();
     QPolygonF _geoPoly;
     QColor _fillColor;
 
     QList<CircleObject *> _editCircles;
+    QList<CircleObject *> _addVertexCircles;
     
 };
 

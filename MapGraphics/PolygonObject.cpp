@@ -10,7 +10,7 @@ PolygonObject::PolygonObject(QPolygonF geoPoly, QColor fillColor, QObject *paren
     MapGraphicsObject(parent), _geoPoly(geoPoly), _fillColor(fillColor)
 {
     this->setFlag(MapGraphicsObject::ObjectIsMovable);
-    this->setFlag(MapGraphicsObject::ObjectIsSelectable);
+    this->setFlag(MapGraphicsObject::ObjectIsSelectable,false);
     this->setFlag(MapGraphicsObject::ObjectIsFocusable);
     this->setPos(_geoPoly.boundingRect().center());
 }
@@ -58,19 +58,28 @@ void PolygonObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     painter->setBrush(_fillColor);
     painter->drawPolygon(enuPoly);
 
+
+    //Populate edit and add-vertex handles if necessary.
+    //Is there a better place to do this? Most likely, yes.
     if (_editCircles.isEmpty())
     {
         //Create objects to edit the polygon!
         for (int i = 0; i < _geoPoly.size(); i++)
         {
-            CircleObject * circle = new CircleObject(8);
-            this->newObjectGenerated(circle);
+            //Edit circles - to change the shape
+            CircleObject * circle = this->constructEditCircle();
             circle->setPos(_geoPoly.at(i));
             _editCircles.append(circle);
-            connect(circle,
-                    SIGNAL(posChanged()),
-                    this,
-                    SLOT(handleEditCirclePosChanged()));
+
+            QPointF current = _geoPoly.at(i);
+            QPointF next = _geoPoly.at((i+1) % _geoPoly.size());
+            QPointF avg((current.x() + next.x())/2.0,
+                        (current.y() + next.y())/2.0);
+
+            //Add vertex circles - to add new vertices
+            CircleObject * betweener = this->constructAddVertexCircle();
+            betweener->setPos(avg);
+            _addVertexCircles.append(betweener);
         }
     }
 }
@@ -89,6 +98,9 @@ void PolygonObject::setPos(const QPointF & nPos)
         //We should also move our edit handles
         foreach(CircleObject * circle, _editCircles)
             circle->setPos(circle->pos() + diff);
+
+        //And our "add vertex" handles
+        this->fixAddVertexCirclePos();
     }
 
     MapGraphicsObject::setPos(nPos);
@@ -124,4 +136,93 @@ void PolygonObject::handleEditCirclePosChanged()
     QPointF newPos = circle->pos();
     _geoPoly.replace(index,newPos);
     this->setPos(_geoPoly.boundingRect().center());
+
+    //We need to update the positions of our "add vertex" controllers
+    this->fixAddVertexCirclePos();
+}
+
+//private slot
+void PolygonObject::handleAddVertexCircleSelected()
+{
+    QObject * sender = QObject::sender();
+    if (sender == 0)
+        return;
+    CircleObject * circle = qobject_cast<CircleObject *>(sender);
+    if (circle == 0)
+        return;
+
+    //If the circle isn't selected, something is wrong
+    if (!circle->isSelected())
+        return;
+
+    //Now that we know the circle was selected, just deselect it. We don't need it selected actually
+    circle->setSelected(false);
+
+    //Get the position at which we should add a vertex
+    QPointF geoPos = circle->pos();
+
+    //The index at which we should insert the new vertex
+    int index = _addVertexCircles.indexOf(circle) + 1;
+
+    //Put the vertex in the polygon
+    _geoPoly.insert(index,geoPos);
+
+    //Create a new "Edit Circle" and put it in the right spot
+    CircleObject * editCircle = this->constructEditCircle();
+    editCircle->setPos(geoPos);
+    _editCircles.insert(index,editCircle);
+
+
+    //Create a new "Add vertex" circle and put it in the right spot
+    CircleObject * addVertexCircle = this->constructAddVertexCircle();
+    QPointF current = _geoPoly.at(index-1);
+    QPointF next = _geoPoly.at(index);
+    QPointF avg((current.x() + next.x())/2.0,
+                (current.y() + next.y())/2.0);
+    addVertexCircle->setPos(avg);
+    _addVertexCircles.insert(index,addVertexCircle);
+
+    this->fixAddVertexCirclePos();
+}
+
+//private
+void PolygonObject::fixAddVertexCirclePos()
+{
+    for (int i = 0; i < _geoPoly.size(); i++)
+    {
+        QPointF current = _geoPoly.at(i);
+        QPointF next = _geoPoly.at((i+1) % _geoPoly.size());
+        QPointF avg((current.x() + next.x())/2.0,
+                    (current.y() + next.y())/2.0);
+        _addVertexCircles.at(i)->setPos(avg);
+    }
+}
+
+//private
+CircleObject *PolygonObject::constructEditCircle()
+{
+    CircleObject * toRet = new CircleObject(8);
+    connect(toRet,
+            SIGNAL(posChanged()),
+            this,
+            SLOT(handleEditCirclePosChanged()));
+
+    this->newObjectGenerated(toRet);
+    return toRet;
+}
+
+//private
+CircleObject *PolygonObject::constructAddVertexCircle()
+{
+    CircleObject * toRet = new CircleObject(3,
+                                            true,
+                                            QColor(100,100,100,255));
+    toRet->setFlag(MapGraphicsObject::ObjectIsMovable,false);
+    connect(toRet,
+            SIGNAL(selectedChanged()),
+            this,
+            SLOT(handleAddVertexCircleSelected()));
+
+    this->newObjectGenerated(toRet);
+    return toRet;
 }
