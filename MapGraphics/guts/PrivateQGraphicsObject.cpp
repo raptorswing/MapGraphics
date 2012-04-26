@@ -347,6 +347,8 @@ void PrivateQGraphicsObject::handleMGFlagsChanged()
     this->setFlag(QGraphicsObject::ItemIsMovable,movable);
     this->setFlag(QGraphicsObject::ItemIsSelectable,selectable);
     this->setFlag(QGraphicsObject::ItemIsFocusable,focusable);
+
+    qDebug() << "Selectable:" << selectable << this;
 }
 
 //private slot

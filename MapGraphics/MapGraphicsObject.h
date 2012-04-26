@@ -19,8 +19,8 @@ public:
     enum MapGraphicsObjectFlag
     {
         ObjectIsMovable = 0x01,
-        ObjectIsSelectable,
-        ObjectIsFocusable
+        ObjectIsSelectable = 0x04,
+        ObjectIsFocusable = 0x08
     };
     Q_DECLARE_FLAGS(MapGraphicsObjectFlags,MapGraphicsObjectFlag)
 
