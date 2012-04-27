@@ -1,6 +1,7 @@
 #include "CircleObject.h"
 
 #include <QtDebug>
+#include <QKeyEvent>
 
 CircleObject::CircleObject(qreal radius,bool sizeIsZoomInvariant, QColor fillColor, MapGraphicsObject *parent) :
     MapGraphicsObject(sizeIsZoomInvariant,parent), _fillColor(fillColor)
@@ -9,6 +10,7 @@ CircleObject::CircleObject(qreal radius,bool sizeIsZoomInvariant, QColor fillCol
 
     this->setFlag(MapGraphicsObject::ObjectIsSelectable);
     this->setFlag(MapGraphicsObject::ObjectIsMovable);
+    this->setFlag(MapGraphicsObject::ObjectIsFocusable);
 }
 
 CircleObject::~CircleObject()
@@ -32,4 +34,17 @@ void CircleObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->drawEllipse(QPointF(0,0),
                          _radius,
                          _radius);
+}
+
+//protected
+//virtual from MapGraphicsObject
+void CircleObject::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Delete))
+    {
+        this->deleteLater();
+        event->accept();
+    }
+    else
+        event->ignore();
 }

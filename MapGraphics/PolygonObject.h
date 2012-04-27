@@ -35,6 +35,7 @@ protected:
 private slots:
     void handleEditCirclePosChanged();
     void handleAddVertexCircleSelected();
+    void handleEditCircleDestroyed();
 
 private:
     void fixAddVertexCirclePos();
@@ -43,8 +44,8 @@ private:
     QPolygonF _geoPoly;
     QColor _fillColor;
 
-    QList<CircleObject *> _editCircles;
-    QList<CircleObject *> _addVertexCircles;
+    QList<MapGraphicsObject *> _editCircles;
+    QList<MapGraphicsObject *> _addVertexCircles;
     
 };
 

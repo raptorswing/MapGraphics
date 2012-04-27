@@ -17,9 +17,13 @@ PolygonObject::PolygonObject(QPolygonF geoPoly, QColor fillColor, QObject *paren
 
 PolygonObject::~PolygonObject()
 {
-    foreach(CircleObject * circle, _editCircles)
+    foreach(MapGraphicsObject * circle, _editCircles)
         circle->deleteLater();
     _editCircles.clear();
+
+    foreach(MapGraphicsObject * circle, _addVertexCircles)
+        circle->deleteLater();
+    _addVertexCircles.clear();
 }
 
 //pure-virtual from MapGraphicsObject
@@ -96,7 +100,7 @@ void PolygonObject::setPos(const QPointF & nPos)
         //_geoPoly.translate(diff);
 
         //We should also move our edit handles
-        foreach(CircleObject * circle, _editCircles)
+        foreach(MapGraphicsObject * circle, _editCircles)
             circle->setPos(circle->pos() + diff);
 
         //And our "add vertex" handles
@@ -162,7 +166,10 @@ void PolygonObject::handleAddVertexCircleSelected()
     QPointF geoPos = circle->pos();
 
     //The index at which we should insert the new vertex
-    int index = _addVertexCircles.indexOf(circle) + 1;
+    int index = _addVertexCircles.indexOf(circle);
+    if (index == -1)
+        return;
+    index++;
 
     //Put the vertex in the polygon
     _geoPoly.insert(index,geoPos);
@@ -183,6 +190,33 @@ void PolygonObject::handleAddVertexCircleSelected()
     _addVertexCircles.insert(index,addVertexCircle);
 
     this->fixAddVertexCirclePos();
+}
+
+//private slot
+void PolygonObject::handleEditCircleDestroyed()
+{
+    QObject * sender = QObject::sender();
+    if (sender == 0)
+    {
+        qWarning() << "Can't process desyroyed edit circle. Sender is null";
+        return;
+    }
+    CircleObject * circle = (CircleObject *) sender;
+
+    int index = _editCircles.indexOf(circle);
+    if (index == -1)
+    {
+        qWarning() << "Can't process destroyed edit circle. Not contained in edit circle list";
+        return;
+    }
+
+    _geoPoly.remove(index);
+    _editCircles.removeAt(index);
+    _addVertexCircles.takeAt(index)->deleteLater();
+
+    this->fixAddVertexCirclePos();
+    this->redrawRequested();
+    this->setPos(_geoPoly.boundingRect().center());
 }
 
 //private
@@ -206,6 +240,10 @@ CircleObject *PolygonObject::constructEditCircle()
             SIGNAL(posChanged()),
             this,
             SLOT(handleEditCirclePosChanged()));
+    connect(toRet,
+            SIGNAL(destroyed()),
+            this,
+            SLOT(handleEditCircleDestroyed()));
 
     this->newObjectGenerated(toRet);
     return toRet;

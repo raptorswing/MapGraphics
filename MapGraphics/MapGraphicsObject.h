@@ -108,7 +108,7 @@ signals:
 
     void flagsChanged();
 
-    //Please do not use this. It should only be used internally for now. Ugly, I know.
+    //Please do not use this for now. It should only be used internally for now. Ugly, I know.
     void selectedChanged();
 
     void newObjectGenerated(MapGraphicsObject *);

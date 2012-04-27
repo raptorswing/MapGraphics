@@ -21,6 +21,10 @@ signals:
     
 public slots:
 
+protected:
+    //virtual from MapGraphicsObject
+    virtual void keyReleaseEvent(QKeyEvent *event);
+
 private:
     qreal _radius;
     QColor _fillColor;
