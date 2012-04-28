@@ -20,6 +20,9 @@ public:
     //pure-virtual from QGraphicsItem
     virtual QRectF boundingRect() const;
 
+    //virtual from QGraphicsitem
+    bool contains(const QPointF &point) const;
+
     //pure-virtual from QGraphicsItem
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 

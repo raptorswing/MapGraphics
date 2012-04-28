@@ -74,6 +74,28 @@ QRectF PrivateQGraphicsObject::boundingRect() const
     return toRet;
 }
 
+//virtual from QGraphicsItem
+bool PrivateQGraphicsObject::contains(const QPointF &point) const
+{
+    if (_mgObj.isNull())
+        return false;
+
+    //convert point to QGraphicsScene coordinates
+    QPointF scenePoint = this->mapToScene(point);
+
+    //Convert scenePoint to geo coordinates
+    QSharedPointer<MapTileSource> tileSource = _infoSource->tileSource();
+    if (tileSource.isNull())
+    {
+        qWarning() << this << "can't do bounding box conversion, null tile source.";
+        return false;
+    }
+    QPointF geoPoint = tileSource->qgs2ll(point,_infoSource->zoomLevel());
+
+    //Ask our MapGraphicsObject about containment
+    return _mgObj->contains(geoPoint);
+}
+
 //pure-virtual from QGraphicsItem
 void PrivateQGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {

@@ -37,10 +37,11 @@ void PrivateQGraphicsScene::handleMGObjectRemoved(MapGraphicsObject * removed)
         return;
     }
 
-    _mgToqg.take(removed);
+    QGraphicsObject * qgObj = _mgToqg.take(removed);
+    delete qgObj;
 
     /*
-      It turns out that removing/deleting the PrivateQGraphicsObjects here was causing crashes.
+      It turns out that removing or "deleting later" the PrivateQGraphicsObjects here was causing crashes.
       Instead, the PrivateQGraphicsObject watches the MapGraphicsObject's destroyed signal to
       delete itself. QGraphicsScene is smart enough to remove deleted objects in this case.
     /*
@@ -49,8 +50,8 @@ void PrivateQGraphicsScene::handleMGObjectRemoved(MapGraphicsObject * removed)
         qWarning() << this << "does not contain PrivateQGraphicsObject" << qgObj;
         return;
     }
-    this->removeItem(qgObj);
     //qgObj->deleteLater();
+    //this->removeItem(qgObj);
     */
 }
 

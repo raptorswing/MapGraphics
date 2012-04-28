@@ -41,6 +41,16 @@ QRectF PolygonObject::boundingRect() const
     return QRectF(topLeftENU,bottomRightENU);
 }
 
+//virtual from MapGraphicsObject
+bool PolygonObject::contains(const QPointF &geoPos) const
+{
+    /*
+    return _geoPoly.containsPoint(geoPos,
+                                  Qt::OddEvenFill);
+                                  */
+    return false;
+}
+
 //pure-virtual from MapGraphicsObject
 void PolygonObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {

@@ -18,6 +18,9 @@ public:
     //pure-virtual from MapGraphicsObject
     QRectF boundingRect() const;
 
+    //virtual from MapGraphicsObject
+    bool contains(const QPointF &geoPos) const;
+
     //pure-virtual from MapGraphicsObject
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 

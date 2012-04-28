@@ -43,17 +43,13 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->dockWidget->setWidget(tileConfigWidget);
     delete this->ui->dockWidgetContents;
 
-    /*
-    CircleObject * circle = new CircleObject(8);
-    scene->addObject(circle);
-    circle->setPos(QPointF(-111.0,41.0));
-    */
-
     QPolygonF poly;
-    poly << QPointF(-111.0,41.0) << QPointF(-112.0,41.0) << QPointF(-111.5,40.0);
-    PolygonObject * polyObj = new PolygonObject(poly);
+    poly << QPointF(-111.658752,40.255456) << QPointF(-111.643386,40.256285) << QPointF(-111.645773,40.244085) << QPointF(-111.656187,40.244183);
+    PolygonObject * polyObj = new PolygonObject(poly, QColor(200,0,0,100));
     scene->addObject(polyObj);
-    //polyObj->setPos(poly.boundingRect().center());
+
+    view->setZoomLevel(14);
+    view->centerOn(polyObj);
 }
 
 MainWindow::~MainWindow()

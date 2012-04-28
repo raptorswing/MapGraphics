@@ -26,6 +26,12 @@ bool MapGraphicsObject::sizeIsZoomInvariant() const
     return _sizeIsZoomInvariant;
 }
 
+bool MapGraphicsObject::contains(const QPointF &geoPos) const
+{
+    QRectF geoRect = this->boundingRect();
+    return geoRect.contains(geoPos);
+}
+
 bool MapGraphicsObject::enabled() const
 {
     return _enabled;

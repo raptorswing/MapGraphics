@@ -17,9 +17,9 @@
 MapGraphicsView::MapGraphicsView(MapGraphicsScene *scene, QWidget *parent) :
     QWidget(parent)
 {
-    //Setup the given scene and set the default zoomLevel to 0
+    //Setup the given scene and set the default zoomLevel to 3
     this->setScene(scene);
-    _zoomLevel = 0;
+    _zoomLevel = 3;
 
     //The default drag mode allows us to drag the map around to move the view
     this->setDragMode(MapGraphicsView::ScrollHandDrag);
@@ -30,7 +30,7 @@ MapGraphicsView::MapGraphicsView(MapGraphicsScene *scene, QWidget *parent) :
             SIGNAL(timeout()),
             this,
             SLOT(renderTiles()));
-    renderTimer->start(200);
+    //renderTimer->start(200);
 }
 
 MapGraphicsView::~MapGraphicsView()
@@ -88,7 +88,8 @@ void MapGraphicsView::centerOn(qreal longitude, qreal latitude)
 
 void MapGraphicsView::centerOn(const MapGraphicsObject *item)
 {
-    Q_UNUSED(item)
+    if (item)
+        this->centerOn(item->pos());
 }
 
 QPointF MapGraphicsView::mapToScene(const QPoint viewPos) const

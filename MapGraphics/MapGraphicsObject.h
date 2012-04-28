@@ -41,6 +41,16 @@ public:
     */
     virtual QRectF boundingRect() const=0;
 
+    /*!
+     \brief You can reimplement this if you want. Given a point in geographic coordinates (lat/lon),
+     return true if the object contains that point. Return otherwise. The default implementation just uses
+     boundingRect() to decide.
+
+     \param geoPos
+     \return bool
+    */
+    virtual bool contains(const QPointF& geoPos) const;
+
     /**
      * @brief Paints the contents of the Object in ENU coordinates --- the same coordinates as boundingRect.
      * You must implement this.
