@@ -30,7 +30,7 @@ MapGraphicsView::MapGraphicsView(MapGraphicsScene *scene, QWidget *parent) :
             SIGNAL(timeout()),
             this,
             SLOT(renderTiles()));
-    //renderTimer->start(200);
+    renderTimer->start(200);
 }
 
 MapGraphicsView::~MapGraphicsView()
