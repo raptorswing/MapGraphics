@@ -19,7 +19,7 @@ MapGraphicsView::MapGraphicsView(MapGraphicsScene *scene, QWidget *parent) :
 {
     //Setup the given scene and set the default zoomLevel to 3
     this->setScene(scene);
-    _zoomLevel = 3;
+    _zoomLevel = 2;
 
     //The default drag mode allows us to drag the map around to move the view
     this->setDragMode(MapGraphicsView::ScrollHandDrag);
