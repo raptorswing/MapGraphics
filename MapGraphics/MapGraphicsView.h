@@ -7,6 +7,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QList>
+#include <QContextMenuEvent>
 
 #include "MapGraphicsScene.h"
 #include "MapGraphicsObject.h"
@@ -73,6 +74,7 @@ signals:
 public slots:
 
 protected slots:
+    virtual void handleChildViewContextMenu(QContextMenuEvent * event);
     virtual void handleChildViewScrollWheel(QWheelEvent * event);
 
 private slots:

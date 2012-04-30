@@ -12,9 +12,14 @@ public:
     virtual ~PrivateQGraphicsView();
 
 protected:
+    //virtual from QGraphicsView
+    virtual void contextMenuEvent(QContextMenuEvent *event);
+
+    //virtual from QGraphicsView
     virtual void wheelEvent(QWheelEvent *event);
     
 signals:
+    void hadContextMenuEvent(QContextMenuEvent *);
     void hadWheelEvent(QWheelEvent *);
     
 public slots:

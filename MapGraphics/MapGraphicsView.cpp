@@ -9,6 +9,7 @@
 #include <QWheelEvent>
 #include <QCoreApplication>
 #include <QThread>
+#include <QMenu>
 
 #include "guts/PrivateQGraphicsScene.h"
 #include "guts/PrivateQGraphicsView.h"
@@ -157,6 +158,10 @@ void MapGraphicsView::setScene(MapGraphicsScene * scene)
             SIGNAL(hadWheelEvent(QWheelEvent*)),
             this,
             SLOT(handleChildViewScrollWheel(QWheelEvent*)));
+    connect(childView,
+            SIGNAL(hadContextMenuEvent(QContextMenuEvent*)),
+            this,
+            SLOT(handleChildViewContextMenu(QContextMenuEvent*)));
 
 
     //Insert new stuff
@@ -283,6 +288,13 @@ void MapGraphicsView::zoomOut(ZoomMode zMode)
         this->setZoomLevel(this->zoomLevel()-1,zMode);
 }
 
+//protected slot
+void MapGraphicsView::handleChildViewContextMenu(QContextMenuEvent *event)
+{
+    Q_UNUSED(event)
+}
+
+//protected slot
 void MapGraphicsView::handleChildViewScrollWheel(QWheelEvent *event)
 {
     this->setDragMode(MapGraphicsView::ScrollHandDrag);
@@ -292,6 +304,7 @@ void MapGraphicsView::handleChildViewScrollWheel(QWheelEvent *event)
         this->zoomOut(MouseZoom);
 }
 
+//private slot
 void MapGraphicsView::renderTiles()
 {
     if (_scene.isNull())
