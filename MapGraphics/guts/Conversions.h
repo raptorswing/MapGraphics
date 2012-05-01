@@ -5,7 +5,9 @@
 #include <QVector3D>
 #include <QPointF>
 
-class Conversions
+#include "MapGraphics_global.h"
+
+class MAPGRAPHICSSHARED_EXPORT Conversions
 {
 public:
     struct Position
