@@ -8,6 +8,9 @@
 #include <QGraphicsScene>
 #include <QList>
 #include <QContextMenuEvent>
+#include <QVector3D>
+#include <QStringBuilder>
+#include <QHash>
 
 #include "MapGraphicsScene.h"
 #include "MapGraphicsObject.h"
@@ -95,8 +98,12 @@ private:
     quint8 _zoomLevel;
 
     DragMode _dragMode;
-
-    
 };
+
+inline uint qHash(const QPointF& key)
+{
+    const QString temp = QString::number(key.x()) % "," % QString::number(key.y());
+    return qHash(temp);
+}
 
 #endif // MAPGRAPHICSVIEW_H

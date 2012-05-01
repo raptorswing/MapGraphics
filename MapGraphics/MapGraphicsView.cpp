@@ -163,7 +163,6 @@ void MapGraphicsView::setScene(MapGraphicsScene * scene)
             this,
             SLOT(handleChildViewContextMenu(QContextMenuEvent*)));
 
-
     //Insert new stuff
     if (this->layout() != 0)
         delete this->layout();
@@ -334,22 +333,28 @@ void MapGraphicsView::doTileLayout()
     viewportPolygonQGV << QPoint(0,0) << QPoint(0,_childView->height()) << QPoint(_childView->width(),_childView->height()) << QPoint(_childView->width(),0);
 
     const QPolygonF viewportPolygonQGS = _childView->mapToScene(viewportPolygonQGV);
+    const QRectF boundingRect = viewportPolygonQGS.boundingRect();
 
+    //We exaggerate the bounding rect for some purposes!
+    QRectF exaggeratedBoundingRect = boundingRect;
+    exaggeratedBoundingRect.setSize(boundingRect.size()*2.0);
+    exaggeratedBoundingRect.moveCenter(boundingRect.center());
 
     //We'll mark tiles that aren't being displayed as free so we can use them
     QQueue<MapTileGraphicsObject *> freeTiles;
 
-    QList<QGraphicsItem *> visibleItems = _childScene->items(viewportPolygonQGS);
+    QSet<QPointF> placesWhereTilesAre;
     foreach(MapTileGraphicsObject * tileObject, _tileObjects)
     {
-        if (!tileObject->isVisible() || !visibleItems.contains(tileObject))
+        if (!tileObject->isVisible() || !exaggeratedBoundingRect.contains(tileObject->pos()))
         {
             freeTiles.enqueue(tileObject);
             tileObject->setVisible(false);
         }
+        else
+            placesWhereTilesAre.insert(tileObject->pos());
     }
 
-    const QRectF boundingRect = viewportPolygonQGS.boundingRect();
     const quint16 tileSize = _tileSource->tileSize();
     const quint32 tilesPerRow = sqrt((long double)_tileSource->tilesOnZoomLevel(this->zoomLevel()));
     const quint32 tilesPerCol = tilesPerRow;
@@ -374,14 +379,9 @@ void MapGraphicsView::doTileLayout()
 
 
             bool tileIsThere = false;
-            foreach(QGraphicsItem * item, _childScene->items(scenePos))
-            {
-                if (item->zValue() == -1.0 && item->isVisible())
-                {
-                    tileIsThere = true;
-                    break;
-                }
-            }
+            if (placesWhereTilesAre.contains(scenePos))
+                tileIsThere = true;
+
             if (tileIsThere)
                 continue;
 
@@ -396,8 +396,10 @@ void MapGraphicsView::doTileLayout()
             }
             //Get the first free tile and make it do its thing
             MapTileGraphicsObject * tileObject = freeTiles.dequeue();
-            tileObject->setPos(scenePos);
-            tileObject->setVisible(true);
+            if (tileObject->pos() != scenePos)
+                tileObject->setPos(scenePos);
+            if (tileObject->isVisible() != true)
+                tileObject->setVisible(true);
             tileObject->setTile(x,y,this->zoomLevel());
         }
     }
