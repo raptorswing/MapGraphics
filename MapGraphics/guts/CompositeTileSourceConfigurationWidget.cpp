@@ -14,26 +14,18 @@ CompositeTileSourceConfigurationWidget::CompositeTileSourceConfigurationWidget(Q
 {
     ui->setupUi(this);
 
-    //Create a fancy delegate for custom drawing of our list items
-    MapTileSourceDelegate * delegato = new MapTileSourceDelegate(composite,this);
-
-    //Create the model that watches the CompositeTileSource
-    MapTileLayerListModel * model = new MapTileLayerListModel(_composite,this);
-
-    //Set the QListView to watch the model and use the delegate
-    this->ui->listView->setModel(model);
-    this->ui->listView->setItemDelegate(delegato);
-
-    QItemSelectionModel * selModel = this->ui->listView->selectionModel();
-    connect(selModel,
-            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-            this,
-            SLOT(handleCurrentSelectionChanged(QModelIndex,QModelIndex)));
+    this->init();
 }
 
 CompositeTileSourceConfigurationWidget::~CompositeTileSourceConfigurationWidget()
 {
     delete ui;
+}
+
+void CompositeTileSourceConfigurationWidget::setComposite(QWeakPointer<CompositeTileSource> nComposite)
+{
+    _composite = nComposite;
+    this->init();
 }
 
 //private slot
@@ -139,4 +131,32 @@ void CompositeTileSourceConfigurationWidget::on_moveUpButton_clicked()
     int currentIndex = index.row();
     int desiredIndex = qMax<int>(0,currentIndex-1);
     strong->moveSource(currentIndex,desiredIndex);
+}
+
+//private
+void CompositeTileSourceConfigurationWidget::init()
+{
+    //Create a fancy delegate for custom drawing of our list items
+    MapTileSourceDelegate * delegato = new MapTileSourceDelegate(_composite,this);
+
+    //Create the model that watches the CompositeTileSource
+    MapTileLayerListModel * model = new MapTileLayerListModel(_composite,this);
+
+    //Set the QListView to watch the model and use the delegate
+    QAbstractItemModel * oldModel = this->ui->listView->model();
+    QAbstractItemDelegate * oldDelegate = this->ui->listView->itemDelegate();
+
+    this->ui->listView->setModel(model);
+    this->ui->listView->setItemDelegate(delegato);
+
+    if (oldModel != 0)
+        delete oldModel;
+    if (oldDelegate != 0)
+        delete oldDelegate;
+
+    QItemSelectionModel * selModel = this->ui->listView->selectionModel();
+    connect(selModel,
+            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this,
+            SLOT(handleCurrentSelectionChanged(QModelIndex,QModelIndex)));
 }

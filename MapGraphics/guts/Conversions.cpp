@@ -139,11 +139,11 @@ QVector3D Conversions::xyz2enu(qreal x, qreal y, qreal z, Conversions::Position 
 
 QVector3D Conversions::enu2xyz(QVector3D enu, qreal reflat, qreal reflon, qreal refalt)
 {
-    QTransform R1 = Conversions::rot(90.0 + reflon,3);
-    QTransform R2 = Conversions::rot(90.0 - reflat,1);
-    QTransform R = R2*R1;
+    const QTransform R1 = Conversions::rot(90.0 + reflon,3);
+    const QTransform R2 = Conversions::rot(90.0 - reflat,1);
+    const QTransform R = R2*R1;
 
-    QTransform invR = R.inverted();
+    const QTransform invR = R.inverted();
     if (invR.isIdentity())
     {
         qDebug() << "Failed to invert rotation matrix --- did you enter a bad lat,lon,or alt?";

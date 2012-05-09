@@ -71,6 +71,12 @@ MapGraphicsView::~MapGraphicsView()
     }
 }
 
+QPointF MapGraphicsView::center() const
+{
+    QPointF centerGeoPos = this->mapToScene(QPoint(this->width()/2,this->height()/2));
+    return centerGeoPos;
+}
+
 void MapGraphicsView::centerOn(const QPointF &pos)
 {
     if (_tileSource.isNull())

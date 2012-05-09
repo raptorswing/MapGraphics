@@ -17,8 +17,11 @@ class MAPGRAPHICSSHARED_EXPORT CompositeTileSourceConfigurationWidget : public Q
     Q_OBJECT
     
 public:
-    explicit CompositeTileSourceConfigurationWidget(QWeakPointer<CompositeTileSource> composite,QWidget *parent = 0);
+    explicit CompositeTileSourceConfigurationWidget(QWeakPointer<CompositeTileSource> composite = QWeakPointer<CompositeTileSource>(),
+                                                    QWidget *parent = 0);
     ~CompositeTileSourceConfigurationWidget();
+
+    void setComposite(QWeakPointer<CompositeTileSource> nComposite);
 
 private slots:
     void handleCurrentSelectionChanged(QModelIndex,QModelIndex);
@@ -32,6 +35,7 @@ private slots:
     void on_moveUpButton_clicked();
 
 private:
+    void init();
     Ui::CompositeTileSourceConfigurationWidget *ui;
     QWeakPointer<CompositeTileSource> _composite;
 };

@@ -41,6 +41,7 @@ public:
     explicit MapGraphicsView(MapGraphicsScene * scene=0, QWidget * parent = 0);
     virtual ~MapGraphicsView();
 
+    QPointF center() const;
     void centerOn(const QPointF& pos);
     void centerOn(qreal longitude, qreal latitude);
     void centerOn(const MapGraphicsObject * item);
