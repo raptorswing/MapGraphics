@@ -26,6 +26,8 @@ public:
 
     //virtual from MapGraphicsObject
     virtual void setPos(const QPointF &);
+
+    QPolygonF geoPoly() const;
     
 signals:
     

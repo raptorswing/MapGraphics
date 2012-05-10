@@ -120,6 +120,11 @@ void PolygonObject::setPos(const QPointF & nPos)
     MapGraphicsObject::setPos(nPos);
 }
 
+QPolygonF PolygonObject::geoPoly() const
+{
+    return _geoPoly;
+}
+
 //protected
 //virtual from MapGraphicsObject
 void PolygonObject::keyReleaseEvent(QKeyEvent *event)

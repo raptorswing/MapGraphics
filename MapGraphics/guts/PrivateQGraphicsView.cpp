@@ -26,7 +26,9 @@ PrivateQGraphicsView::~PrivateQGraphicsView()
 ////virtual from QGraphicsView
 void PrivateQGraphicsView::contextMenuEvent(QContextMenuEvent *event)
 {
-    this->hadContextMenuEvent(event);
+    QGraphicsView::contextMenuEvent(event);
+    if (!event->isAccepted())
+        this->hadContextMenuEvent(event);
 }
 
 //protected
