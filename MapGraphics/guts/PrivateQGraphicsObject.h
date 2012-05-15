@@ -3,6 +3,7 @@
 
 #include <QGraphicsObject>
 #include <QPointer>
+#include <QHash>
 
 #include "MapGraphicsObject.h"
 
@@ -81,6 +82,10 @@ private slots:
 
 private:
     void setMGObj(MapGraphicsObject *);
+
+    void convertSceneMouseEventCoordinates(QGraphicsSceneMouseEvent * event);
+    void unconvertSceneMouseEventCoorindates(QGraphicsSceneMouseEvent * event);
+    QHash<QGraphicsSceneMouseEvent *, QPointF> _unconvertedSceneMouseCoordinates;
 
     QPointer<MapGraphicsObject> _mgObj;
     PrivateQGraphicsInfoSource * _infoSource;

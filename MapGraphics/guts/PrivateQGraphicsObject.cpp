@@ -90,7 +90,7 @@ bool PrivateQGraphicsObject::contains(const QPointF &point) const
         qWarning() << this << "can't do bounding box conversion, null tile source.";
         return false;
     }
-    QPointF geoPoint = tileSource->qgs2ll(point,_infoSource->zoomLevel());
+    QPointF geoPoint = tileSource->qgs2ll(scenePoint,_infoSource->zoomLevel());
 
     //Ask our MapGraphicsObject about containment
     return _mgObj->contains(geoPoint);
@@ -147,7 +147,16 @@ void PrivateQGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent *ev
     if (_mgObj.isNull())
         return;
 
+    //Convert to geo position for the MapGraphicsObject
+    const QPointF qgsScenePos = event->scenePos();
+    QSharedPointer<MapTileSource> tileSource = _infoSource->tileSource();
+    QPointF geoScenePos = tileSource->qgs2ll(qgsScenePos,_infoSource->zoomLevel());
+    event->setScenePos(geoScenePos);
+
     _mgObj->contextMenuEvent(event);
+
+    //Convert back to QGS coordinates
+    event->setScenePos(qgsScenePos);
 
     if (!event->isAccepted())
         QGraphicsObject::contextMenuEvent(event);
@@ -209,7 +218,9 @@ void PrivateQGraphicsObject::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *eve
     if (_mgObj.isNull())
         return;
 
+    this->convertSceneMouseEventCoordinates(event);
     _mgObj->mouseDoubleClickEvent(event);
+    this->unconvertSceneMouseEventCoorindates(event);
 
     if (!event->isAccepted())
         QGraphicsObject::mouseDoubleClickEvent(event);
@@ -224,9 +235,9 @@ void PrivateQGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     QGraphicsObject::mouseMoveEvent(event);
     return;
 
+    this->convertSceneMouseEventCoordinates(event);
     _mgObj->mouseMoveEvent(event);
-
-    qDebug() << "move" <<  event->isAccepted();
+    this->unconvertSceneMouseEventCoorindates(event);
 
     if (!event->isAccepted())
         QGraphicsObject::mouseMoveEvent(event);
@@ -238,7 +249,9 @@ void PrivateQGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if (_mgObj.isNull())
         return;
 
+    this->convertSceneMouseEventCoordinates(event);
     _mgObj->mousePressEvent(event);
+    this->unconvertSceneMouseEventCoorindates(event);
 
     if (!event->isAccepted())
         QGraphicsObject::mousePressEvent(event);
@@ -249,8 +262,9 @@ void PrivateQGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     if (_mgObj.isNull())
         return;
-
+    this->convertSceneMouseEventCoordinates(event);
     _mgObj->mouseReleaseEvent(event);
+    this->unconvertSceneMouseEventCoorindates(event);
 
     if (!event->isAccepted())
         QGraphicsObject::mouseReleaseEvent(event);
@@ -262,7 +276,16 @@ void PrivateQGraphicsObject::wheelEvent(QGraphicsSceneWheelEvent *event)
     if (_mgObj.isNull())
         return;
 
+    //Convert to geo position for the MapGraphicsObject
+    const QPointF qgsScenePos = event->scenePos();
+    QSharedPointer<MapTileSource> tileSource = _infoSource->tileSource();
+    QPointF geoScenePos = tileSource->qgs2ll(qgsScenePos,_infoSource->zoomLevel());
+    event->setScenePos(geoScenePos);
+
     _mgObj->wheelEvent(event);
+
+    //Convert back to QGS coordinates
+    event->setScenePos(qgsScenePos);
 
     if (!event->isAccepted())
         QGraphicsObject::wheelEvent(event);
@@ -454,4 +477,31 @@ void PrivateQGraphicsObject::setMGObj(MapGraphicsObject * mgObj)
             SIGNAL(destroyed()),
             this,
             SLOT(deleteLater()));
+}
+
+//private
+void PrivateQGraphicsObject::convertSceneMouseEventCoordinates(QGraphicsSceneMouseEvent *event)
+{
+    const QPointF qgsScenePos = event->scenePos();
+    QSharedPointer<MapTileSource> tileSource = _infoSource->tileSource();
+    QPointF geoPos = tileSource->qgs2ll(qgsScenePos,_infoSource->zoomLevel());
+
+    _unconvertedSceneMouseCoordinates.insert(event,qgsScenePos);
+
+    event->setScenePos(geoPos);
+}
+
+//private
+void PrivateQGraphicsObject::unconvertSceneMouseEventCoorindates(QGraphicsSceneMouseEvent *event)
+{
+    QPointF qgsScenePos;
+    if (_unconvertedSceneMouseCoordinates.contains(event))
+        qgsScenePos = _unconvertedSceneMouseCoordinates.take(event);
+    else
+    {
+        qWarning() << this << "didn't have original scene mouse coordiantes stored for un-conversion";
+        QSharedPointer<MapTileSource> tileSource = _infoSource->tileSource();
+        qgsScenePos = tileSource->ll2qgs(event->scenePos(),_infoSource->zoomLevel());
+    }
+    event->setScenePos(qgsScenePos);
 }

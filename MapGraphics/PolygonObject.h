@@ -37,6 +37,7 @@ public slots:
 
 protected:
     //virtual from MapGraphicsObject
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * event);
     virtual void keyReleaseEvent(QKeyEvent *event);
 
 private slots:

@@ -47,8 +47,6 @@ bool PolygonObject::contains(const QPointF &geoPos) const
 
     return _geoPoly.containsPoint(geoPos,
                                   Qt::OddEvenFill);
-
-    //return false;
 }
 
 //pure-virtual from MapGraphicsObject
@@ -129,6 +127,26 @@ void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
 {
     _geoPoly = newPoly;
     this->setPos(newPoly.boundingRect().center());
+}
+
+//protected
+//virtual from MapGraphicsObject
+void PolygonObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    /*
+      This method is a bit of a hack --- ideally contains() or some other method
+      we "reimplement" from PrivateQGraphicsObject should take care of this, but it
+      hasn't been working. This prevents the polygon from being grabbed when the user
+      click inside the bounding box but outside of the actual polygon
+    */
+    const QPointF geoPos = event->scenePos();
+
+    //If the geo point is within our geo polygon, we might accept it
+    if (_geoPoly.containsPoint(geoPos,Qt::OddEvenFill))
+        MapGraphicsObject::mousePressEvent(event);
+    //Otherwise we ignore it
+    else
+        event->ignore();
 }
 
 //protected
