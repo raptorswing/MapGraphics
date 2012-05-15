@@ -28,6 +28,8 @@ public:
     virtual void setPos(const QPointF &);
 
     QPolygonF geoPoly() const;
+
+    void setGeoPoly(const QPolygonF& newPoly);
     
 signals:
     

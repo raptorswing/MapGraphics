@@ -12,7 +12,7 @@ PolygonObject::PolygonObject(QPolygonF geoPoly, QColor fillColor, QObject *paren
     this->setFlag(MapGraphicsObject::ObjectIsMovable);
     this->setFlag(MapGraphicsObject::ObjectIsSelectable,false);
     this->setFlag(MapGraphicsObject::ObjectIsFocusable);
-    this->setPos(_geoPoly.boundingRect().center());
+    this->setGeoPoly(geoPoly);
 }
 
 PolygonObject::~PolygonObject()
@@ -123,6 +123,12 @@ void PolygonObject::setPos(const QPointF & nPos)
 QPolygonF PolygonObject::geoPoly() const
 {
     return _geoPoly;
+}
+
+void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
+{
+    _geoPoly = newPoly;
+    this->setPos(newPoly.boundingRect().center());
 }
 
 //protected
