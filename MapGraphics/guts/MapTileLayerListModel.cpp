@@ -38,7 +38,7 @@ QVariant MapTileLayerListModel::data(const QModelIndex &index, int role) const
 
     QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
     if (strong.isNull())
-        return 0;
+        return QVariant("Null composite");
 
     if (role == Qt::DisplayRole)
     {
