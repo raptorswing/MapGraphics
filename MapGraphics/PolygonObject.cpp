@@ -127,11 +127,11 @@ QPolygonF PolygonObject::geoPoly() const
 
 void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
 {
+    this->setPos(newPoly.boundingRect().center());
     if (newPoly == _geoPoly)
         return;
 
     _geoPoly = newPoly;
-    this->setPos(newPoly.boundingRect().center());
     this->polygonChanged(newPoly);
 }
 
