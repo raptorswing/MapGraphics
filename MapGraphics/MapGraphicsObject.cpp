@@ -72,6 +72,8 @@ QPointF MapGraphicsObject::pos() const
 
 void MapGraphicsObject::setPos(const QPointF & nPos)
 {
+    if (nPos == _pos)
+        return;
     _pos = nPos;
     this->posChanged();
 }
@@ -83,6 +85,8 @@ qreal MapGraphicsObject::rotation() const
 
 void MapGraphicsObject::setRotation(qreal nRotation)
 {
+    if (nRotation == _rotation)
+        return;
     _rotation = nRotation;
     this->rotationChanged();
 }
@@ -94,6 +98,8 @@ bool MapGraphicsObject::visible() const
 
 void MapGraphicsObject::setVisible(bool nVisible)
 {
+    if (nVisible == _visible)
+        return;
     _visible = nVisible;
     this->visibleChanged();
 }

@@ -32,6 +32,7 @@ public:
     void setGeoPoly(const QPolygonF& newPoly);
     
 signals:
+    void polygonChanged(const QPolygonF& poly);
     
 public slots:
 
