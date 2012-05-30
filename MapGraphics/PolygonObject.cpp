@@ -135,6 +135,12 @@ void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
     this->polygonChanged(newPoly);
 }
 
+void PolygonObject::setFillColor(const QColor &color)
+{
+    _fillColor = color;
+    this->redrawRequested();
+}
+
 //protected
 //virtual from MapGraphicsObject
 void PolygonObject::mousePressEvent(QGraphicsSceneMouseEvent *event)

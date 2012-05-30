@@ -30,6 +30,8 @@ public:
     QPolygonF geoPoly() const;
 
     void setGeoPoly(const QPolygonF& newPoly);
+
+    void setFillColor(const QColor& color);
     
 signals:
     void polygonChanged(const QPolygonF& poly);
