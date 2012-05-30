@@ -66,6 +66,12 @@ signals:
 
     */
     void sourcesChanged();
+
+    void sourceAdded(int index);
+
+    void sourceRemoved(int index);
+
+    void sourcesReordered();
     
 public slots:
 

@@ -145,6 +145,7 @@ void CompositeTileSource::addSourceTop(QSharedPointer<MapTileSource> source, qre
             this,
             SLOT(handleTileRetrieved(quint32,quint32,quint8)));
 
+    this->sourceAdded(0);
     this->sourcesChanged();
     this->allTilesInvalidated();
 }
@@ -167,6 +168,7 @@ void CompositeTileSource::addSourceBottom(QSharedPointer<MapTileSource> source, 
             this,
             SLOT(handleTileRetrieved(quint32,quint32,quint8)));
 
+    this->sourceAdded(_childSources.size()-1);
     this->sourcesChanged();
     this->allTilesInvalidated();
 }
@@ -186,6 +188,7 @@ void CompositeTileSource::moveSource(int from, int to)
     _childOpacities.move(from,to);
     _childEnabledFlags.move(from,to);
 
+    this->sourcesReordered();
     this->sourcesChanged();
     this->allTilesInvalidated();
 }
@@ -201,6 +204,7 @@ void CompositeTileSource::removeSource(int index)
     _childEnabledFlags.removeAt(index);
     this->clearPendingTiles();
 
+    this->sourceRemoved(index);
     this->sourcesChanged();
     this->allTilesInvalidated();
 }
