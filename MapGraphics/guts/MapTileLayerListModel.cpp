@@ -9,12 +9,21 @@ MapTileLayerListModel::MapTileLayerListModel(QWeakPointer<CompositeTileSource> c
     QSharedPointer<CompositeTileSource> strong = _composite.toStrongRef();
     if (strong.isNull())
         return;
+    CompositeTileSource * raw = strong.data();
 
     //When the model (CompositeTileSource) changes, reload data
-    connect(strong.data(),
+    connect(raw,
             SIGNAL(sourcesChanged()),
             this,
             SLOT(handleCompositeSourcesChanged()));
+    connect(raw,
+            SIGNAL(sourceAdded(int)),
+            this,
+            SLOT(handleCompositeSourcesAdded(int)));
+    connect(raw,
+            SIGNAL(sourceRemoved(int)),
+            this,
+            SLOT(handleCompositeSourcesRemoved(int)));
 }
 
 int MapTileLayerListModel::rowCount(const QModelIndex &parent) const
@@ -65,4 +74,20 @@ void MapTileLayerListModel::handleCompositeSourcesChanged()
     QModelIndex topleft = this->index(0);
     QModelIndex bottomright = this->index(this->rowCount());
     this->dataChanged(topleft,bottomright);
+}
+
+void MapTileLayerListModel::handleCompositeSourcesAdded(int index)
+{
+    this->beginInsertRows(QModelIndex(),
+                          index,
+                          index);
+    this->endInsertRows();
+}
+
+void MapTileLayerListModel::handleCompositeSourcesRemoved(int index)
+{
+    this->beginRemoveRows(QModelIndex(),
+                          index,
+                          index);
+    this->endRemoveRows();
 }

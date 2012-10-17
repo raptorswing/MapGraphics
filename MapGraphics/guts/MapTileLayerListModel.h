@@ -22,6 +22,8 @@ public slots:
 
 private slots:
     void handleCompositeSourcesChanged();
+    void handleCompositeSourcesAdded(int index);
+    void handleCompositeSourcesRemoved(int index);
 
 private:
     QWeakPointer<CompositeTileSource> _composite;
