@@ -33,22 +33,22 @@ QVector3D Conversions::lla2xyz(qreal wlat, qreal wlon, qreal walt)
     return toRet;
 }
 
-QVector3D Conversions::lla2xyz(const Conversions::Position & lla)
+QVector3D Conversions::lla2xyz(const Position & lla)
 {
-    return Conversions::lla2xyz(lla.lonlat.y(),
-                                lla.lonlat.x(),
-                                lla.altitude);
+    return Conversions::lla2xyz(lla.latitude(),
+                                lla.longitude(),
+                                lla.altitude());
 }
 
-Conversions::Position Conversions::xyz2lla(const QVector3D & v)
+Position Conversions::xyz2lla(const QVector3D & v)
 {
     return Conversions::xyz2lla(v.x(),v.y(),v.z());
 }
 
-Conversions::Position Conversions::xyz2lla(qreal x, qreal y, qreal z)
+Position Conversions::xyz2lla(qreal x, qreal y, qreal z)
 {
     Position toRet;
-    toRet.altitude = 0.0;
+    toRet.setAltitude(0.0);
 
     if (x == 0.0 && y == 0.0 && z == 0.0)
     {
@@ -57,9 +57,9 @@ Conversions::Position Conversions::xyz2lla(qreal x, qreal y, qreal z)
     }
 
     if (x == 0.0 && y == 0.0)
-        toRet.lonlat.setX(0.0);
+        toRet.setLongitude(0.0);
     else
-        toRet.lonlat.setX(atan2(y,x)*rad2deg);
+        toRet.setLongitude(atan2(y,x)*rad2deg);
 
     qreal rhosqrd = x*x + y*y;
     qreal rho = sqrt(rhosqrd);
@@ -89,8 +89,8 @@ Conversions::Position Conversions::xyz2lla(qreal x, qreal y, qreal z)
         tempalt = tempalt - invdet*(-1*cc*rhoerror + aa*zerror);
     }
 
-    toRet.lonlat.setY(templat*rad2deg);
-    toRet.altitude = tempalt;
+    toRet.setLatitude(templat*rad2deg);
+    toRet.setAltitude(tempalt);
     return toRet;
 }
 
@@ -116,9 +116,9 @@ QVector3D Conversions::xyz2enu(const QVector3D &xyz, qreal reflat, qreal reflon,
 QVector3D Conversions::xyz2enu(const QVector3D &xyz, const Position &refLLA)
 {
     return Conversions::xyz2enu(xyz,
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
 QVector3D Conversions::xyz2enu(qreal x, qreal y, qreal z, qreal reflat, qreal reflon, qreal refalt)
@@ -132,9 +132,9 @@ QVector3D Conversions::xyz2enu(qreal x, qreal y, qreal z, qreal reflat, qreal re
 QVector3D Conversions::xyz2enu(qreal x, qreal y, qreal z, const Position &refLLA)
 {
     return Conversions::xyz2enu(QVector3D(x,y,z),
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
 QVector3D Conversions::enu2xyz(const QVector3D & enu, qreal reflat, qreal reflon, qreal refalt)
@@ -161,12 +161,12 @@ QVector3D Conversions::enu2xyz(const QVector3D & enu, qreal reflat, qreal reflon
     return (diffxyz + refxyz);
 }
 
-QVector3D Conversions::enu2xyz(const QVector3D & enu, const Conversions::Position & refLLA)
+QVector3D Conversions::enu2xyz(const QVector3D & enu, const Position & refLLA)
 {
     return Conversions::enu2xyz(enu,
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
 QVector3D Conversions::enu2xyz(qreal east, qreal north, qreal up, qreal reflat, qreal reflon, qreal refalt)
@@ -177,29 +177,29 @@ QVector3D Conversions::enu2xyz(qreal east, qreal north, qreal up, qreal reflat, 
                                 refalt);
 }
 
-QVector3D Conversions::enu2xyz(qreal east, qreal north, qreal up, const Conversions::Position & refLLA)
+QVector3D Conversions::enu2xyz(qreal east, qreal north, qreal up, const Position & refLLA)
 {
     return Conversions::enu2xyz(QVector3D(east,north,up),
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
-Conversions::Position Conversions::enu2lla(const QVector3D & enu, qreal reflat, qreal reflon, qreal refalt)
+Position Conversions::enu2lla(const QVector3D & enu, qreal reflat, qreal reflon, qreal refalt)
 {
     QVector3D xyz = Conversions::enu2xyz(enu,reflat,reflon,refalt);
     return Conversions::xyz2lla(xyz);
 }
 
-Conversions::Position Conversions::enu2lla(const QVector3D & enu, const Conversions::Position & refLLA)
+Position Conversions::enu2lla(const QVector3D & enu, const Position & refLLA)
 {
     return Conversions::enu2lla(enu,
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
-Conversions::Position Conversions::enu2lla(qreal east, qreal north, qreal up, qreal reflat, qreal reflon, qreal refalt)
+Position Conversions::enu2lla(qreal east, qreal north, qreal up, qreal reflat, qreal reflon, qreal refalt)
 {
     return Conversions::enu2lla(QVector3D(east,north,up),
                                 reflat,
@@ -207,12 +207,12 @@ Conversions::Position Conversions::enu2lla(qreal east, qreal north, qreal up, qr
                                 refalt);
 }
 
-Conversions::Position Conversions::enu2lla(qreal east, qreal north, qreal up, const Conversions::Position & refLLA)
+Position Conversions::enu2lla(qreal east, qreal north, qreal up, const Position & refLLA)
 {
     return Conversions::enu2lla(QVector3D(east, north, up),
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
 QVector3D Conversions::lla2enu(qreal lat, qreal lon, qreal alt, qreal reflat, qreal reflon, qreal refalt)
@@ -223,32 +223,32 @@ QVector3D Conversions::lla2enu(qreal lat, qreal lon, qreal alt, qreal reflat, qr
     return enu;
 }
 
-QVector3D Conversions::lla2enu(qreal lat, qreal lon, qreal alt, const Conversions::Position & refLLA)
+QVector3D Conversions::lla2enu(qreal lat, qreal lon, qreal alt, const Position & refLLA)
 {
     return Conversions::lla2enu(lat,lon,alt,
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
 QVector3D Conversions::lla2enu(const Position &lla, qreal reflat, qreal reflon, qreal refalt)
 {
-    return Conversions::lla2enu(lla.lonlat.y(),
-                                lla.lonlat.x(),
-                                lla.altitude,
+    return Conversions::lla2enu(lla.latitude(),
+                                lla.longitude(),
+                                lla.altitude(),
                                 reflat,
                                 reflon,
                                 refalt);
 }
 
-QVector3D Conversions::lla2enu(const Conversions::Position & lla, const Conversions::Position & refLLA)
+QVector3D Conversions::lla2enu(const Position & lla, const Position & refLLA)
 {
-    return Conversions::lla2enu(lla.lonlat.y(),
-                                lla.lonlat.x(),
-                                lla.altitude,
-                                refLLA.lonlat.y(),
-                                refLLA.lonlat.x(),
-                                refLLA.altitude);
+    return Conversions::lla2enu(lla.latitude(),
+                                lla.longitude(),
+                                lla.altitude(),
+                                refLLA.latitude(),
+                                refLLA.longitude(),
+                                refLLA.altitude());
 }
 
 QTransform Conversions::rot(qreal angle, quint32 axis)
@@ -279,13 +279,13 @@ QTransform Conversions::rot(qreal angle, quint32 axis)
 
 void Conversions::test()
 {
-    Position byu1 = {QPointF(-111.649253,40.249707),1423};
+    Position byu1(QPointF(-111.649253,40.249707),1423);
     QVector3D xyz = Conversions::lla2xyz(byu1);
     Position byu2 = Conversions::xyz2lla(xyz);
 
-    if (qAbs(byu2.lonlat.x() - byu1.lonlat.x()) > 0.001 ||
-            qAbs(byu2.lonlat.y() - byu1.lonlat.y()) > 0.001 ||
-            qAbs(byu2.altitude - byu1.altitude) > 1.0)
+    if (qAbs(byu2.longitude() - byu1.longitude()) > 0.001 ||
+            qAbs(byu2.latitude() - byu1.latitude()) > 0.001 ||
+            qAbs(byu2.altitude() - byu1.altitude()) > 1.0)
         qDebug() << "Failed LLA -> XYZ -> LLA";
     else
         qDebug() << "Passed LLA -> XYZ -> LLA";

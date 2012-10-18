@@ -41,15 +41,15 @@ QRectF PrivateQGraphicsObject::boundingRect() const
 
     //Convert from ENU to lat/lon
     QPointF latLonCenter = _mgObj->pos();
-    Conversions::Position latLonCenterPos = {latLonCenter,0.0};
+    Position latLonCenterPos(latLonCenter, 0.0);
     QPointF leftLatLon = Conversions::enu2lla(enuRect.left(),
                                               0.0,
                                               0.0,
-                                              latLonCenterPos).lonlat;
+                                              latLonCenterPos).lonLat();
     QPointF upLatLon = Conversions::enu2lla(0.0,
                                             enuRect.top(),
                                             0.0,
-                                            latLonCenterPos).lonlat;
+                                            latLonCenterPos).lonLat();
 
     qreal lonWidth = 2.0*(latLonCenter.x() - leftLatLon.x());
     qreal latHeight = 2.0*(upLatLon.y() - latLonCenter.y());

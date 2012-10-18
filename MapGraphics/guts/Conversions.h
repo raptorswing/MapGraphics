@@ -6,15 +6,10 @@
 #include <QPointF>
 
 #include "MapGraphics_global.h"
+#include "Position.h"
 
 class MAPGRAPHICSSHARED_EXPORT Conversions
 {
-public:
-    struct Position
-    {
-        QPointF lonlat;
-        qreal altitude;
-    };
 public:
     static QVector3D lla2xyz(qreal wlat, qreal wlon, qreal walt);
     static QVector3D lla2xyz(const Position &lla);

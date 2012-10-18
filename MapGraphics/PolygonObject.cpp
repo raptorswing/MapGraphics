@@ -31,9 +31,9 @@ QRectF PolygonObject::boundingRect() const
 {
     QRectF latLonRect = _geoPoly.boundingRect();
     QPointF latLonCenter = latLonRect.center();
-    Conversions::Position latLonCenterPos = {latLonCenter,0.0};
-    Conversions::Position topLeftPos = {latLonRect.topLeft(),0.0};
-    Conversions::Position bottomRightPos = {latLonRect.bottomRight(),0.0};
+    Position latLonCenterPos(latLonCenter,0.0);
+    Position topLeftPos(latLonRect.topLeft(),0.0);
+    Position bottomRightPos(latLonRect.bottomRight(),0.0);
 
     QPointF topLeftENU = Conversions::lla2enu(topLeftPos,latLonCenterPos).toPointF();
     QPointF bottomRightENU = Conversions::lla2enu(bottomRightPos,latLonCenterPos).toPointF();
@@ -58,10 +58,10 @@ void PolygonObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
     QPolygonF enuPoly;
 
-    Conversions::Position latLonCenterPos = {_geoPoly.boundingRect().center(),0};
+    Position latLonCenterPos(_geoPoly.boundingRect().center(),0);
     foreach(QPointF latLon, _geoPoly)
     {
-        Conversions::Position latLonPos = {latLon,0};
+        Position latLonPos(latLon,0.0);
         QPointF enu = Conversions::lla2enu(latLonPos,latLonCenterPos).toPointF();
         enuPoly << enu;
     }
