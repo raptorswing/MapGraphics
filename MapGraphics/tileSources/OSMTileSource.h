@@ -5,7 +5,9 @@
 #include "MapGraphics_global.h"
 #include <QSet>
 #include <QHash>
-#include <QNetworkReply>
+
+//Forward declaration so that projects that import us as a library don't necessarily have to use QT += network
+class QNetworkReply;
 
 class MAPGRAPHICSSHARED_EXPORT OSMTileSource : public MapTileSource
 {

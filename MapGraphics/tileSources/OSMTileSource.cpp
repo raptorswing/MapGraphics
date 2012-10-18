@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QStringBuilder>
 #include <QtDebug>
+#include <QNetworkReply>
 
 const qreal PI = 3.14159265358979323846;
 const qreal deg2rad = PI / 180.0;
