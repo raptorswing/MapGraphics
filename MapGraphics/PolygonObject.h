@@ -29,7 +29,7 @@ public:
 
     QPolygonF geoPoly() const;
 
-    void setGeoPoly(const QPolygonF& newPoly);
+    virtual void setGeoPoly(const QPolygonF& newPoly);
 
     void setFillColor(const QColor& color);
     
