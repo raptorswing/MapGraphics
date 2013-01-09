@@ -11,8 +11,8 @@ class MAPGRAPHICSSHARED_EXPORT Position
 {
 public:
     Position();
-    Position(qreal longitude, qreal latitude, qreal altitude);
-    Position(const QPointF& lonLat, qreal altitude);
+    Position(qreal longitude, qreal latitude, qreal altitude = 0.0);
+    Position(const QPointF& lonLat, qreal altitude = 0.0);
     Position(const Position& other);
     ~Position();
 
