@@ -16,8 +16,8 @@ public:
     Position(const Position& other);
     ~Position();
 
-    bool operator ==(const Position& other);
-    bool operator !=(const Position& other);
+    bool operator ==(const Position& other) const;
+    bool operator !=(const Position& other) const;
     Position& operator =(const Position& other);
 
     qreal longitude() const;
@@ -43,5 +43,9 @@ MAPGRAPHICSSHARED_EXPORT QDebug operator<<(QDebug dbg, const Position& pos);
 //Non-member methods for serializing and de-serializing
 MAPGRAPHICSSHARED_EXPORT QDataStream& operator<<(QDataStream& stream, const Position& pos);
 MAPGRAPHICSSHARED_EXPORT QDataStream& operator>>(QDataStream& stream, Position& pos);
+
+//Non-member method for hashing
+
+MAPGRAPHICSSHARED_EXPORT uint qHash(const Position& pos);
 
 #endif // POSITION_H

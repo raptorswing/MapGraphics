@@ -30,13 +30,13 @@ Position::~Position()
 {
 }
 
-bool Position::operator ==(const Position &other)
+bool Position::operator ==(const Position &other) const
 {
     return ((other._lonLat == this->_lonLat)
             && (other._altitude == this->_altitude));
 }
 
-bool Position::operator !=(const Position &other)
+bool Position::operator !=(const Position &other) const
 {
     return !(*this == other);
 }
@@ -111,9 +111,9 @@ Position Position::fromENU(const Position &refPos, const QVector3D &enu)
 //Non-member method for streaming to qDebug
 QDebug operator<<(QDebug dbg, const Position& pos)
 {
-    dbg.nospace() << "(" << pos.longitude() << "," << pos.latitude() << ")";
+    dbg.nospace() << "(" << QString::number(pos.longitude(),'g',10) << "," << QString::number(pos.latitude(),'g',10) << ")";
 
-    return dbg.nospace();
+    return dbg.space();
 }
 
 //Non-member methods for serializing and de-serializing
@@ -137,4 +137,10 @@ QDataStream& operator>>(QDataStream& stream, Position& pos)
     pos.setAltitude(altitude);
 
     return stream;
+}
+
+//Non-member method for hashing
+uint qHash(const Position& pos)
+{
+    return pos.lonLat().x() + pos.lonLat().y() + pos.altitude();
 }
