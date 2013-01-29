@@ -34,6 +34,9 @@ public:
     static QVector3D lla2enu(const Position & lla, qreal reflat, qreal reflon, qreal refalt);
     static QVector3D lla2enu(const Position & lla, const Position & refLLA);
 
+    static qreal degreesLatPerMeter(const qreal latitude);
+    static qreal degreesLonPerMeter(const qreal latitude);
+
     static QTransform rot(qreal angle, quint32 axis);
 
     static void test();

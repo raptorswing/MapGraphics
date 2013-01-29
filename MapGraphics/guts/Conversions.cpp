@@ -251,6 +251,20 @@ QVector3D Conversions::lla2enu(const Position & lla, const Position & refLLA)
                                 refLLA.altitude());
 }
 
+qreal Conversions::degreesLatPerMeter(const qreal latitude)
+{
+    const qreal latRad = latitude * (pi / 180.0);
+    qreal meters = 111132.954 - 559.822 * cos(2.0 * latRad) + 1.175 * cos(4.0 * latRad);
+    return 1.0 / meters;
+}
+
+qreal Conversions::degreesLonPerMeter(const qreal latitude)
+{
+    const qreal latRad = latitude * (pi / 180.0);
+    qreal meters = (pi * A_EARTH * cos(latRad)) / (180.0 * sqrt(1.0 - NAV_E2 * pow(sin(latRad), 2.0)));
+    return 1.0 / meters;
+}
+
 QTransform Conversions::rot(qreal angle, quint32 axis)
 {
     QTransform toRet;
@@ -299,4 +313,6 @@ void Conversions::test()
     else
         qDebug() << "Passed LLA -> ENU -> LLA -> ENU";
 
+    qDebug() << degreesLatPerMeter(15.0);
+    qDebug() << degreesLonPerMeter(15.0);
 }
