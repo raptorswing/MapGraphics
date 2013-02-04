@@ -15,6 +15,7 @@ const qreal rad2deg = 180.0 / PI;
 OSMTileSource::OSMTileSource(OSMTileType tileType) :
     MapTileSource(), _tileType(tileType)
 {
+    this->setCacheMode(MapTileSource::DiskAndMemCaching);
 }
 
 OSMTileSource::~OSMTileSource()
