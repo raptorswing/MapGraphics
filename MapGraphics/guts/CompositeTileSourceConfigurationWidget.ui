@@ -24,6 +24,10 @@
        <property name="text">
         <string>+</string>
        </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/images/edit_add.png</normaloff>:/icons/images/edit_add.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
@@ -33,6 +37,10 @@
        </property>
        <property name="text">
         <string>X</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/images/editdelete.png</normaloff>:/icons/images/editdelete.png</iconset>
        </property>
       </widget>
      </item>
@@ -111,6 +119,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

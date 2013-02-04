@@ -75,3 +75,6 @@ unix:!symbian {
 
 FORMS += \
     guts/CompositeTileSourceConfigurationWidget.ui
+
+RESOURCES += \
+    resources.qrc
