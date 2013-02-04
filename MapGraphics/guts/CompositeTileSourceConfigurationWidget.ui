@@ -18,15 +18,15 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QToolButton" name="addSourceButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
        <property name="text">
         <string>+</string>
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
          <normaloff>:/icons/images/edit_add.png</normaloff>:/icons/images/edit_add.png</iconset>
+       </property>
+       <property name="popupMode">
+        <enum>QToolButton::InstantPopup</enum>
        </property>
       </widget>
      </item>

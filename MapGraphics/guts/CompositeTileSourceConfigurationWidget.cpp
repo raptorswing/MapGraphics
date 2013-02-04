@@ -4,7 +4,10 @@
 #include "MapTileLayerListModel.h"
 #include "MapTileSourceDelegate.h"
 
+#include "tileSources/OSMTileSource.h"
+
 #include <QtDebug>
+#include <QMenu>
 
 CompositeTileSourceConfigurationWidget::CompositeTileSourceConfigurationWidget(QWeakPointer<CompositeTileSource> composite,
                                                              QWidget *parent) :
@@ -63,6 +66,39 @@ void CompositeTileSourceConfigurationWidget::handleCompositeChange()
 
     qreal opacityFloat = strong->getOpacity(index.row());
     this->ui->opacitySlider->setValue(opacityFloat*100);
+}
+
+//private slot
+void CompositeTileSourceConfigurationWidget::addOSMTileLayer()
+{
+    QSharedPointer<CompositeTileSource> composite = _composite.toStrongRef();
+    if (composite.isNull())
+        return;
+
+    QSharedPointer<OSMTileSource> source(new OSMTileSource(OSMTileSource::OSMTiles));
+    composite->addSourceTop(source);
+}
+
+//private slot
+void CompositeTileSourceConfigurationWidget::addMapQuestLayer()
+{
+    QSharedPointer<CompositeTileSource> composite = _composite.toStrongRef();
+    if (composite.isNull())
+        return;
+
+    QSharedPointer<OSMTileSource> source(new OSMTileSource(OSMTileSource::MapQuestOSMTiles));
+    composite->addSourceTop(source);
+}
+
+//private slot
+void CompositeTileSourceConfigurationWidget::addMapQuestSatLayer()
+{
+    QSharedPointer<CompositeTileSource> composite = _composite.toStrongRef();
+    if (composite.isNull())
+        return;
+
+    QSharedPointer<OSMTileSource> source(new OSMTileSource(OSMTileSource::MapQuestAerialTiles));
+    composite->addSourceTop(source);
 }
 
 //private slot
@@ -165,4 +201,12 @@ void CompositeTileSourceConfigurationWidget::init()
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this,
             SLOT(handleCurrentSelectionChanged(QModelIndex,QModelIndex)));
+
+
+    //Build a menu of possible sources for the "add" button
+    QMenu * menu = new QMenu(this->ui->addSourceButton);
+    menu->addAction("OpenStreetMap Tiles", this, SLOT(addOSMTileLayer()));
+    menu->addAction("MapQuest-OSM Tiles", this, SLOT(addMapQuestLayer()));
+    menu->addAction("MapQuest Open Aerial Tiles", this, SLOT(addMapQuestSatLayer()));
+    this->ui->addSourceButton->setMenu(menu);
 }
