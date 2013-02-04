@@ -115,7 +115,7 @@ void OSMTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
     }
     else
     {
-        host = "http://oatile1.mqcdn.com";
+        host = "http://otile1.mqcdn.com";
         url = "/tiles/1.0.0/sat/%1/%2/%3.jpg";
     }
 
