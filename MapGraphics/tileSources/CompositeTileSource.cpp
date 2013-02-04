@@ -394,6 +394,11 @@ void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
     {
         QImage * childTile = tiles->value(i);
         qreal opacity = _childOpacities[i];
+
+        //If there are no other layers, we need to be opaque no matter what
+        if (this->numSources() == 1)
+            opacity = 1.0;
+
         if (_childEnabledFlags[i] == false)
             opacity = 0.0;
         painter.setOpacity(opacity);
