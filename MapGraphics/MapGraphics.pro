@@ -24,7 +24,6 @@ SOURCES += MapGraphicsScene.cpp \
     tileSources/OSMTileSource.cpp \
     guts/MapGraphicsNetwork.cpp \
     tileSources/CompositeTileSource.cpp \
-    guts/SQLiteKeyValueStore.cpp \
     guts/MapTileLayerListModel.cpp \
     guts/MapTileSourceDelegate.cpp \
     guts/CompositeTileSourceConfigurationWidget.cpp \
@@ -47,7 +46,6 @@ HEADERS += MapGraphicsScene.h\
     tileSources/OSMTileSource.h \
     guts/MapGraphicsNetwork.h \
     tileSources/CompositeTileSource.h \
-    guts/SQLiteKeyValueStore.h \
     guts/MapTileLayerListModel.h \
     guts/MapTileSourceDelegate.h \
     guts/CompositeTileSourceConfigurationWidget.h \
