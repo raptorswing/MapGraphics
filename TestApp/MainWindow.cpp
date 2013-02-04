@@ -43,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->dockWidget->setWidget(tileConfigWidget);
     delete this->ui->dockWidgetContents;
 
+    this->ui->menuWindow->addAction(this->ui->dockWidget->toggleViewAction());
+    this->ui->dockWidget->toggleViewAction()->setText("&Layers");
+
     QPolygonF poly;
     poly << QPointF(-111.658752,40.255456) << QPointF(-111.643386,40.256285) << QPointF(-111.645773,40.244085) << QPointF(-111.656187,40.244183);
     PolygonObject * polyObj = new PolygonObject(poly, QColor(200,0,0,100));
@@ -55,4 +58,10 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+//private slot
+void MainWindow::on_actionExit_triggered()
+{
+    this->close();
 }
