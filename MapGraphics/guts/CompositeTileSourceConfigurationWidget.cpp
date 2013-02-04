@@ -76,6 +76,8 @@ void CompositeTileSourceConfigurationWidget::on_removeSourceButton_clicked()
         return;
 
     strong->removeSource(index.row());
+
+    selModel->clear();
 }
 
 //private slot
@@ -113,6 +115,8 @@ void CompositeTileSourceConfigurationWidget::on_moveDownButton_clicked()
     int currentIndex = index.row();
     int desiredIndex = qMin<int>(numberOfLayers-1,currentIndex+1);
     strong->moveSource(currentIndex,desiredIndex);
+    selModel->setCurrentIndex(selModel->model()->index(desiredIndex,0),
+                              QItemSelectionModel::SelectCurrent);
 }
 
 //private slot
@@ -131,6 +135,8 @@ void CompositeTileSourceConfigurationWidget::on_moveUpButton_clicked()
     int currentIndex = index.row();
     int desiredIndex = qMax<int>(0,currentIndex-1);
     strong->moveSource(currentIndex,desiredIndex);
+    selModel->setCurrentIndex(selModel->model()->index(desiredIndex,0),
+                              QItemSelectionModel::SelectCurrent);
 }
 
 //private

@@ -44,6 +44,9 @@
        <property name="text">
         <string>D</string>
        </property>
+       <property name="arrowType">
+        <enum>Qt::DownArrow</enum>
+       </property>
       </widget>
      </item>
      <item>
@@ -53,6 +56,9 @@
        </property>
        <property name="text">
         <string>U</string>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::UpArrow</enum>
        </property>
       </widget>
      </item>
@@ -94,6 +100,9 @@
      </property>
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="dragDropMode">
+      <enum>QAbstractItemView::InternalMove</enum>
      </property>
      <property name="uniformItemSizes">
       <bool>true</bool>
