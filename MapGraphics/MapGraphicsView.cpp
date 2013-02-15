@@ -135,7 +135,7 @@ void MapGraphicsView::setDragMode(MapGraphicsView::DragMode mode)
     if (_childView.isNull())
         return;
 
-    _childView->setDragMode(QGraphicsView::ScrollHandDrag);
+    _childView->setDragMode(qgvDragMode);
 }
 
 MapGraphicsScene *MapGraphicsView::scene() const
