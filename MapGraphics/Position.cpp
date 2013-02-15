@@ -2,6 +2,9 @@
 
 #include "guts/Conversions.h"
 
+#include <QtGlobal>
+#include <cmath>
+
 Position::Position()
 {
     _lonLat = QPointF(0.0,0.0);
@@ -85,6 +88,44 @@ void Position::setLatitude(const qreal &latitude)
 void Position::setAltitude(const qreal &altitude)
 {
     _altitude = altitude;
+}
+
+qreal Position::flatDistanceEstimate(const Position &other) const
+{
+    const qreal avgLat = (this->latitude() + other.latitude()) / 2.0;
+    const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
+    const qreal latPerMeter = Conversions::degreesLatPerMeter(avgLat);
+
+    const qreal lonDiff = (other.longitude() - this->longitude()) / lonPerMeter;
+    const qreal latDiff = (other.latitude() - this->latitude()) / latPerMeter;
+
+    const qreal toRet = sqrt(lonDiff * lonDiff + latDiff * latDiff);
+
+    return toRet;
+}
+
+qreal Position::flatManhattanEstimate(const Position &other) const
+{
+    const qreal avgLat = (this->latitude() + other.latitude()) / 2.0;
+    const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
+    const qreal latPerMeter = Conversions::degreesLatPerMeter(avgLat);
+
+    const qreal lonDiff = (other.longitude() - this->longitude()) / lonPerMeter;
+    const qreal latDiff = (other.latitude() - this->latitude()) / latPerMeter;
+
+    return qAbs<qreal>(lonDiff) + qAbs<qreal>(latDiff);
+}
+
+qreal Position::angleTo(const Position &dest) const
+{
+    const qreal avgLat = (this->latitude() + dest.latitude()) / 2.0;
+    const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
+    const qreal latPerMeter = Conversions::degreesLatPerMeter(avgLat);
+
+    const qreal lonDiff = (dest.longitude() - this->longitude()) / lonPerMeter;
+    const qreal latDiff = (dest.latitude() - this->latitude()) / latPerMeter;
+
+    return atan2(latDiff, lonDiff);
 }
 
 //static

@@ -29,6 +29,10 @@ public:
     void setLatitude(const qreal& latitude);
     void setAltitude(const qreal& altitude);
 
+    qreal flatDistanceEstimate(const Position& other) const;
+    qreal flatManhattanEstimate(const Position& other) const;
+    qreal angleTo(const Position& dest) const;
+
     static QVector3D Position2ENU(const Position& refPos, const Position& pos);
     static Position fromENU(const Position& refPos, const QVector3D& enu);
 
