@@ -36,6 +36,17 @@ void CircleObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
                          _radius);
 }
 
+qreal CircleObject::radius() const
+{
+    return _radius;
+}
+
+void CircleObject::setRadius(qreal radius)
+{
+    _radius = radius;
+    this->redrawRequested();
+}
+
 //protected
 //virtual from MapGraphicsObject
 void CircleObject::keyReleaseEvent(QKeyEvent *event)

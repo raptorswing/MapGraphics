@@ -16,6 +16,9 @@ public:
 
     //pure-virtual from MapGraphicsObject
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    qreal radius() const;
+    void setRadius(qreal radius);
     
 signals:
     
