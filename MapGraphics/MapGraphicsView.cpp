@@ -159,7 +159,23 @@ void MapGraphicsView::setScene(MapGraphicsScene * scene)
             SLOT(handleZoomLevelChanged()));
 
     //Create a QGraphicsView that handles drawing for us
-    PrivateQGraphicsView * childView = new PrivateQGraphicsView(childScene,this);
+    PrivateQGraphicsView * childView = new PrivateQGraphicsView(childScene, this);
+    connect(childView,
+            SIGNAL(hadMouseDoubleClickEvent(QMouseEvent*)),
+            this,
+            SLOT(handleChildMouseDoubleClick(QMouseEvent*)));
+    connect(childView,
+            SIGNAL(hadMouseMoveEvent(QMouseEvent*)),
+            this,
+            SLOT(handleChildMouseMove(QMouseEvent*)));
+    connect(childView,
+            SIGNAL(hadMousePressEvent(QMouseEvent*)),
+            this,
+            SLOT(handleChildMousePress(QMouseEvent*)));
+    connect(childView,
+            SIGNAL(hadMouseReleaseEvent(QMouseEvent*)),
+            this,
+            SLOT(handleChildMouseRelease(QMouseEvent*)));
     connect(childView,
             SIGNAL(hadWheelEvent(QWheelEvent*)),
             this,
@@ -237,13 +253,13 @@ void MapGraphicsView::setZoomLevel(quint8 nZoom, ZoomMode zMode)
         return;
 
     //This stuff is for handling the re-centering upong zoom in/out
-    QPointF  centerGeoPos = this->mapToScene(QPoint(this->width()/2,this->height()/2));
+    const QPointF  centerGeoPos = this->mapToScene(QPoint(this->width()/2,this->height()/2));
     QPointF mousePoint = _childView->mapToScene(_childView->mapFromGlobal(QCursor::pos()));
     QRectF sceneRect = _childScene->sceneRect();
-    float xRatio = mousePoint.x() / sceneRect.width();
-    float yRatio = mousePoint.y() / sceneRect.height();
-    QPointF centerPos = _childView->mapToScene(QPoint(_childView->width()/2,_childView->height()/2));
-    QPointF offset = mousePoint - centerPos;
+    const float xRatio = mousePoint.x() / sceneRect.width();
+    const float yRatio = mousePoint.y() / sceneRect.height();
+    const QPointF centerPos = _childView->mapToScene(QPoint(_childView->width()/2,_childView->height()/2));
+    const QPointF offset = mousePoint - centerPos;
 
     //Change the zoom level
     nZoom = qMin(_tileSource->maxZoomLevel(),qMax(_tileSource->minZoomLevel(),nZoom));
@@ -294,14 +310,40 @@ void MapGraphicsView::zoomOut(ZoomMode zMode)
 }
 
 //protected slot
+void MapGraphicsView::handleChildMouseDoubleClick(QMouseEvent *event)
+{
+    event->setAccepted(false);
+}
+
+//protected slot
+void MapGraphicsView::handleChildMouseMove(QMouseEvent *event)
+{
+    event->setAccepted(false);
+}
+
+//protected slot
+void MapGraphicsView::handleChildMousePress(QMouseEvent *event)
+{
+    event->setAccepted(false);
+}
+
+//protected slot
+void MapGraphicsView::handleChildMouseRelease(QMouseEvent *event)
+{
+    event->setAccepted(false);
+}
+
+//protected slot
 void MapGraphicsView::handleChildViewContextMenu(QContextMenuEvent *event)
 {
-    Q_UNUSED(event)
+    event->setAccepted(false);
 }
 
 //protected slot
 void MapGraphicsView::handleChildViewScrollWheel(QWheelEvent *event)
 {
+    event->setAccepted(true);
+
     this->setDragMode(MapGraphicsView::ScrollHandDrag);
     if (event->delta() > 0)
         this->zoomIn(MouseZoom);
@@ -365,11 +407,11 @@ void MapGraphicsView::doTileLayout()
     const quint32 tilesPerRow = sqrt((long double)_tileSource->tilesOnZoomLevel(this->zoomLevel()));
     const quint32 tilesPerCol = tilesPerRow;
 
-    qint32 perSide = qMax(boundingRect.width()/tileSize,
+    const qint32 perSide = qMax(boundingRect.width()/tileSize,
                        boundingRect.height()/tileSize) + 3;
-    qint32 xc = qMax((qint32)0,
+    const qint32 xc = qMax((qint32)0,
                      (qint32)(centerPointQGS.x() / tileSize) - perSide/2);
-    qint32 yc = qMax((qint32)0,
+    const qint32 yc = qMax((qint32)0,
                      (qint32)(centerPointQGS.y() / tileSize) - perSide/2);
     const qint32 xMax = qMin((qint32)tilesPerRow,
                               xc + perSide);
@@ -428,7 +470,7 @@ void MapGraphicsView::resetQGSSceneSize()
         return;
 
     //Make sure the size of our QGraphicsScene is correct
-    quint64 dimension = sqrt((long double)_tileSource->tilesOnZoomLevel(this->zoomLevel()))*_tileSource->tileSize();
+    const quint64 dimension = sqrt((long double)_tileSource->tilesOnZoomLevel(this->zoomLevel()))*_tileSource->tileSize();
     if (_childScene->sceneRect().width() != dimension)
         _childScene->setSceneRect(0,0,dimension,dimension);
 }
