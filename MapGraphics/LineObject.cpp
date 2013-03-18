@@ -34,8 +34,6 @@ QRectF LineObject::boundingRect() const
                        widthMeters,
                        heightMeters);
 
-    qDebug() << "Bounding rect" << toRet;
-
     return toRet;
 }
 
@@ -46,6 +44,8 @@ void LineObject::paint(QPainter *painter,
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
+
+    painter->setRenderHint(QPainter::Antialiasing, true);
 
     const qreal avgLat = (_a.latitude() + _b.latitude()) / 2.0;
     const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
@@ -61,10 +61,6 @@ void LineObject::paint(QPainter *painter,
                           offsetB.y() / latPerMeter);
 
     painter->drawLine(metersA, metersB);
-
-    qDebug() << "Draw at" << metersA << metersB;
-
-    painter->fillRect(this->boundingRect(), Qt::black);
 }
 
 //public slot
