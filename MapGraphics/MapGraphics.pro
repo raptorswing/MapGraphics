@@ -30,7 +30,8 @@ SOURCES += MapGraphicsScene.cpp \
     CircleObject.cpp \
     guts/PrivateQGraphicsInfoSource.cpp \
     PolygonObject.cpp \
-    Position.cpp
+    Position.cpp \
+    LineObject.cpp
 
 HEADERS += MapGraphicsScene.h\
         MapGraphics_global.h \
@@ -52,7 +53,8 @@ HEADERS += MapGraphicsScene.h\
     CircleObject.h \
     guts/PrivateQGraphicsInfoSource.h \
     PolygonObject.h \
-    Position.h
+    Position.h \
+    LineObject.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
