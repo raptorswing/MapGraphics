@@ -43,7 +43,7 @@ public:
 
     /*!
      \brief You can reimplement this if you want. Given a point in geographic coordinates (lat/lon),
-     return true if the object contains that point. Return otherwise. The default implementation just uses
+     return true if the object contains that point. Return false otherwise. The default implementation just uses
      boundingRect() to decide.
 
      \param geoPos
@@ -52,7 +52,9 @@ public:
     virtual bool contains(const QPointF& geoPos) const;
 
     /**
-     * @brief Paints the contents of the Object in ENU coordinates --- the same coordinates as boundingRect.
+     * @brief Paints the contents of the Object in ENU coordinates if the object is not zoom invariant.
+     * If it is zoom invariant, the units are pixels. That is, this painter should operate in the same
+     * units as returned by boundingRect().
      * You must implement this.
      *
      * @param painter
