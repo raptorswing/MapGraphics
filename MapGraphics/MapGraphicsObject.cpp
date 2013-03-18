@@ -2,9 +2,10 @@
 
 #include <QtDebug>
 #include <QKeyEvent>
+#include <QTimer>
 
 MapGraphicsObject::MapGraphicsObject(bool sizeIsZoomInvariant, MapGraphicsObject *parent) :
-    _sizeIsZoomInvariant(sizeIsZoomInvariant)
+    _sizeIsZoomInvariant(sizeIsZoomInvariant), _constructed(false)
 {
     //Set default properties and the parent that was passed as argument
     _enabled = true;
@@ -15,6 +16,13 @@ MapGraphicsObject::MapGraphicsObject(bool sizeIsZoomInvariant, MapGraphicsObject
     _visible = true;
     _zValue = 0.0;
     _selected = false;
+
+
+    /*
+     * When we get back to the event loop, mark us as constructed.
+     * This is a hack so that we can set properties of child objects in their constructors
+    */
+    QTimer::singleShot(1, this, SLOT(setConstructed()));
 }
 
 MapGraphicsObject::~MapGraphicsObject()
@@ -40,7 +48,10 @@ bool MapGraphicsObject::enabled() const
 void MapGraphicsObject::setEnabled(bool nEnabled)
 {
     _enabled = nEnabled;
-    this->enabledChanged();
+    if (_constructed)
+        this->enabledChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(enabledChanged()));
 }
 
 qreal MapGraphicsObject::opacity() const
@@ -51,7 +62,10 @@ qreal MapGraphicsObject::opacity() const
 void MapGraphicsObject::setOpacity(qreal nOpacity)
 {
     _opacity = nOpacity;
-    this->opacityChanged();
+    if (_constructed)
+        this->opacityChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(opacityChanged()));
 }
 
 MapGraphicsObject *MapGraphicsObject::parent() const
@@ -62,7 +76,10 @@ MapGraphicsObject *MapGraphicsObject::parent() const
 void MapGraphicsObject::setParent(MapGraphicsObject * nParent)
 {
     _parent = nParent;
-    this->parentChanged();
+    if (_constructed)
+        this->parentChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(parentChanged()));
 }
 
 QPointF MapGraphicsObject::pos() const
@@ -75,7 +92,11 @@ void MapGraphicsObject::setPos(const QPointF & nPos)
     if (nPos == _pos)
         return;
     _pos = nPos;
-    this->posChanged();
+
+    if (_constructed)
+        this->posChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(posChanged()));
 }
 
 qreal MapGraphicsObject::rotation() const
@@ -88,7 +109,11 @@ void MapGraphicsObject::setRotation(qreal nRotation)
     if (nRotation == _rotation)
         return;
     _rotation = nRotation;
-    this->rotationChanged();
+
+    if (_constructed)
+        this->rotationChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(rotationChanged()));
 }
 
 bool MapGraphicsObject::visible() const
@@ -101,7 +126,11 @@ void MapGraphicsObject::setVisible(bool nVisible)
     if (nVisible == _visible)
         return;
     _visible = nVisible;
-    this->visibleChanged();
+
+    if (_constructed)
+        this->visibleChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(visibleChanged()));
 }
 
 qreal MapGraphicsObject::longitude() const
@@ -132,7 +161,11 @@ qreal MapGraphicsObject::zValue() const
 void MapGraphicsObject::setZValue(qreal nZValue)
 {
     _zValue = nZValue;
-    this->zValueChanged();
+
+    if (_constructed)
+        this->zValueChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(zValueChanged()));
 }
 
 bool MapGraphicsObject::isSelected() const
@@ -145,8 +178,11 @@ void MapGraphicsObject::setSelected(bool sel)
     if (_selected == sel)
         return;
     _selected = sel;
-    this->selectedChanged();
 
+    if (_constructed)
+        this->selectedChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(selectedChanged()));
 }
 
 void MapGraphicsObject::setFlag(MapGraphicsObject::MapGraphicsObjectFlag flag, bool enabled)
@@ -162,7 +198,11 @@ void MapGraphicsObject::setFlag(MapGraphicsObject::MapGraphicsObjectFlag flag, b
 void MapGraphicsObject::setFlags(MapGraphicsObject::MapGraphicsObjectFlags flags)
 {
     _flags = flags;
-    this->flagsChanged();
+
+    if (_constructed)
+        this->flagsChanged();
+    else
+        QTimer::singleShot(1, this, SIGNAL(flagsChanged()));
 }
 
 MapGraphicsObject::MapGraphicsObjectFlags MapGraphicsObject::flags() const
@@ -232,4 +272,11 @@ void MapGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void MapGraphicsObject::wheelEvent(QGraphicsSceneWheelEvent *event)
 {
     event->ignore();
+}
+
+
+//private slot
+void MapGraphicsObject::setConstructed()
+{
+    _constructed = true;
 }

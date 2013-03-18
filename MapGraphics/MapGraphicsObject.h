@@ -138,6 +138,9 @@ signals:
     
 public slots:
 
+private slots:
+    void setConstructed();
+
 private:
     bool _sizeIsZoomInvariant;
 
@@ -151,6 +154,8 @@ private:
     bool _selected;
 
     MapGraphicsObject::MapGraphicsObjectFlags _flags;
+
+    bool _constructed;
     
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(MapGraphicsObject::MapGraphicsObjectFlags)
