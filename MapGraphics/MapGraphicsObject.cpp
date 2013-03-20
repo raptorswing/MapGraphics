@@ -82,7 +82,7 @@ void MapGraphicsObject::setParent(MapGraphicsObject * nParent)
         QTimer::singleShot(1, this, SIGNAL(parentChanged()));
 }
 
-QPointF MapGraphicsObject::pos() const
+const QPointF &MapGraphicsObject::pos() const
 {
     return _pos;
 }

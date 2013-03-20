@@ -72,7 +72,7 @@ public:
     MapGraphicsObject * parent() const;
     void setParent(MapGraphicsObject *);
 
-    QPointF pos() const;
+    const QPointF& pos() const;
     virtual void setPos(const QPointF&);
 
     qreal rotation() const;
