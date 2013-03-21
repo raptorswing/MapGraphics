@@ -17,12 +17,13 @@ PolygonObject::PolygonObject(QPolygonF geoPoly, QColor fillColor, QObject *paren
 
 PolygonObject::~PolygonObject()
 {
+    qDebug() << this << "destroying";
     foreach(MapGraphicsObject * circle, _editCircles)
-        circle->deleteLater();
+        this->destroyEditCircle(circle);
     _editCircles.clear();
 
     foreach(MapGraphicsObject * circle, _addVertexCircles)
-        circle->deleteLater();
+        this->destroyAddVertexCircle(circle);
     _addVertexCircles.clear();
 }
 
@@ -127,7 +128,6 @@ QPolygonF PolygonObject::geoPoly() const
 
 void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
 {
-    this->setPos(newPoly.boundingRect().center());
     if (newPoly == _geoPoly)
         return;
 
@@ -140,6 +140,7 @@ void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
     _editCircles.clear();
     _addVertexCircles.clear();
 
+    this->setPos(newPoly.boundingRect().center());
     this->polygonChanged(newPoly);
 }
 
