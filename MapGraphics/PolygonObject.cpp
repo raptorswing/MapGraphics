@@ -132,6 +132,14 @@ void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
         return;
 
     _geoPoly = newPoly;
+
+    foreach(MapGraphicsObject * obj, _editCircles)
+        this->destroyEditCircle(obj);
+    foreach(MapGraphicsObject * obj, _addVertexCircles)
+        this->destroyAddVertexCircle(obj);
+    _editCircles.clear();
+    _addVertexCircles.clear();
+
     this->polygonChanged(newPoly);
 }
 
@@ -307,6 +315,20 @@ CircleObject *PolygonObject::constructEditCircle()
 }
 
 //private
+void PolygonObject::destroyEditCircle(MapGraphicsObject *obj)
+{
+    disconnect(obj,
+               SIGNAL(posChanged()),
+               this,
+               SLOT(handleEditCirclePosChanged()));
+    disconnect(obj,
+               SIGNAL(destroyed()),
+               this,
+               SLOT(handleEditCircleDestroyed()));
+    obj->deleteLater();
+}
+
+//private
 CircleObject *PolygonObject::constructAddVertexCircle()
 {
     CircleObject * toRet = new CircleObject(3,
@@ -320,4 +342,14 @@ CircleObject *PolygonObject::constructAddVertexCircle()
 
     this->newObjectGenerated(toRet);
     return toRet;
+}
+
+//private
+void PolygonObject::destroyAddVertexCircle(MapGraphicsObject *obj)
+{
+    disconnect(obj,
+               SIGNAL(selectedChanged()),
+               this,
+               SLOT(handleAddVertexCircleSelected()));
+    obj->deleteLater();
 }

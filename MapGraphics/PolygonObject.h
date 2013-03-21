@@ -50,8 +50,13 @@ private slots:
 
 private:
     void fixAddVertexCirclePos();
+
     CircleObject * constructEditCircle();
+    void destroyEditCircle(MapGraphicsObject * obj);
+
     CircleObject * constructAddVertexCircle();
+    void destroyAddVertexCircle(MapGraphicsObject * obj);
+
     QPolygonF _geoPoly;
     QColor _fillColor;
 
