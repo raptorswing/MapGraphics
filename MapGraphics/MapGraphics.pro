@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += network sql
+QT       += network sql widgets
 
 TARGET = MapGraphics
 TEMPLATE = lib
