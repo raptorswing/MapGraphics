@@ -26,13 +26,13 @@ QRectF LineObject::boundingRect() const
     const qreal widthLon = qAbs<qreal>(_a.longitude() - _b.longitude());
     const qreal heightlat = qAbs<qreal>(_a.latitude() - _b.latitude());
 
-    const qreal widthMeters = widthLon / lonPerMeter;
-    const qreal heightMeters = heightlat / latPerMeter;
+    const qreal widthMeters = qMax<qreal>(widthLon / lonPerMeter, 5.0);
+    const qreal heightMeters = qMax<qreal>(heightlat / latPerMeter, 5.0);
 
-    const QRectF toRet(-0.5 * widthMeters,
-                       -0.5 * heightMeters,
-                       widthMeters,
-                       heightMeters);
+    const QRectF toRet(-1.0 * widthMeters,
+                       -1.0 * heightMeters,
+                       2.0 * widthMeters,
+                       2.0 * heightMeters);
 
     return toRet;
 }
@@ -44,8 +44,8 @@ void LineObject::paint(QPainter *painter,
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
-
     painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setPen(QPen(Qt::black,3));
 
     const qreal avgLat = (_a.latitude() + _b.latitude()) / 2.0;
     const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
