@@ -18,7 +18,7 @@ QVector3D Conversions::lla2xyz(qreal wlat, qreal wlon, qreal walt)
     //The reference code tests for wlon > 360.0 for some reason. I'm assuming that's a bug
     if (wlat < -90.0 || wlat > 90.0 || wlon < -180.0 || wlon > 180.0)
     {
-        qDebug() << "Lat/Lon out of range";
+        qDebug() << "Lat/Lon out of range" << wlat << wlon;
         return toRet;
     }
 
