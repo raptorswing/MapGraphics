@@ -11,6 +11,7 @@ class MAPGRAPHICSSHARED_EXPORT LineObject : public MapGraphicsObject
 public:
     explicit LineObject(const Position& endA,
                         const Position& endB,
+                        qreal thickness = 0.0,
                         MapGraphicsObject *parent = 0);
     virtual ~LineObject();
 
@@ -19,6 +20,9 @@ public:
 
     //pure-virtual from MapGraphicsObject
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    qreal thickness() const;
+    void setThickness(qreal nThick);
     
 signals:
     
@@ -34,6 +38,7 @@ private slots:
 private:
     Position _a;
     Position _b;
+    qreal _thickness;
     
 };
 

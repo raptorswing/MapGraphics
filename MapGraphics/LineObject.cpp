@@ -5,10 +5,12 @@
 
 LineObject::LineObject(const Position &endA,
                        const Position &endB,
+                       qreal thickness,
                        MapGraphicsObject *parent) :
     MapGraphicsObject(false, parent),
     _a(endA), _b(endB)
 {
+    _thickness = qBound<qreal>(0.0, thickness, 5.0);
     this->updatePositionFromEndPoints();
 }
 
@@ -44,8 +46,11 @@ void LineObject::paint(QPainter *painter,
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
+
     painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->setPen(QPen(Qt::black,3));
+    QPen pen = painter->pen();
+    pen.setWidthF(_thickness);
+    painter->setPen(pen);
 
     const qreal avgLat = (_a.latitude() + _b.latitude()) / 2.0;
     const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
@@ -61,6 +66,17 @@ void LineObject::paint(QPainter *painter,
                           offsetB.y() / latPerMeter);
 
     painter->drawLine(metersA, metersB);
+}
+
+qreal LineObject::thickness() const
+{
+    return _thickness;
+}
+
+void LineObject::setThickness(qreal nThick)
+{
+    _thickness = qBound<qreal>(0.0, nThick, 5.0);
+    this->redrawRequested();
 }
 
 //public slot
