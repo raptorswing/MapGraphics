@@ -92,40 +92,41 @@ void Position::setAltitude(const qreal &altitude)
 
 qreal Position::flatDistanceEstimate(const Position &other) const
 {
-    const qreal avgLat = (this->latitude() + other.latitude()) / 2.0;
-    const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
-    const qreal latPerMeter = Conversions::degreesLatPerMeter(avgLat);
-
-    const qreal lonDiff = (other.longitude() - this->longitude()) / lonPerMeter;
-    const qreal latDiff = (other.latitude() - this->latitude()) / latPerMeter;
-
-    const qreal toRet = sqrt(lonDiff * lonDiff + latDiff * latDiff);
-
-    return toRet;
+    const QVector2D offsetMeters = this->flatOffsetMeters(other);
+    return offsetMeters.length();
 }
 
-qreal Position::flatManhattanEstimate(const Position &other) const
-{
-    const qreal avgLat = (this->latitude() + other.latitude()) / 2.0;
-    const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
-    const qreal latPerMeter = Conversions::degreesLatPerMeter(avgLat);
-
-    const qreal lonDiff = (other.longitude() - this->longitude()) / lonPerMeter;
-    const qreal latDiff = (other.latitude() - this->latitude()) / latPerMeter;
-
-    return qAbs<qreal>(lonDiff) + qAbs<qreal>(latDiff);
-}
-
-qreal Position::angleTo(const Position &dest) const
+QVector2D Position::flatOffsetMeters(const Position &dest) const
 {
     const qreal avgLat = (this->latitude() + dest.latitude()) / 2.0;
     const qreal lonPerMeter = Conversions::degreesLonPerMeter(avgLat);
     const qreal latPerMeter = Conversions::degreesLatPerMeter(avgLat);
 
-    const qreal lonDiff = (dest.longitude() - this->longitude()) / lonPerMeter;
-    const qreal latDiff = (dest.latitude() - this->latitude()) / latPerMeter;
+    const qreal lonDiffMeters = (dest.longitude() - this->longitude()) / lonPerMeter;
+    const qreal latDiffMeters = (dest.latitude() - this->latitude()) / latPerMeter;
 
-    return atan2(latDiff, lonDiff);
+    return QVector2D(lonDiffMeters, latDiffMeters);
+}
+
+Position Position::flatOffsetToPosition(const QPointF& offset) const
+{
+    const qreal lonPerMeter = Conversions::degreesLonPerMeter(this->latitude());
+    const qreal latPerMeter = Conversions::degreesLatPerMeter(this->latitude());
+
+    return Position(this->longitude() + offset.x() * lonPerMeter,
+                    this->latitude() + offset.y() * latPerMeter);
+}
+
+qreal Position::flatManhattanEstimate(const Position &other) const
+{
+    const QVector2D offsetMeters = this->flatOffsetMeters(other);
+    return qAbs<qreal>(offsetMeters.x()) + qAbs<qreal>(offsetMeters.y());
+}
+
+qreal Position::angleTo(const Position &dest) const
+{
+    const QVector2D offsetMeters = this->flatOffsetMeters(dest);
+    return atan2(offsetMeters.y(), offsetMeters.x());
 }
 
 //static

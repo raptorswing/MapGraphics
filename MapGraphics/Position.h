@@ -4,6 +4,7 @@
 #include <QPointF>
 #include <QtDebug>
 #include <QVector3D>
+#include <QVector2D>
 
 #include "MapGraphics_global.h"
 
@@ -30,6 +31,8 @@ public:
     void setAltitude(const qreal& altitude);
 
     qreal flatDistanceEstimate(const Position& other) const;
+    QVector2D flatOffsetMeters(const Position& dest) const;
+    Position flatOffsetToPosition(const QPointF &offset) const;
     qreal flatManhattanEstimate(const Position& other) const;
     qreal angleTo(const Position& dest) const;
 
