@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->addObject(polyObj);
 
     view->setZoomLevel(14);
-    view->centerOn(polyObj);
+    view->centerOn(-111.658752, 40.255456);
 }
 
 MainWindow::~MainWindow()
