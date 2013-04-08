@@ -11,9 +11,13 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        MainWindow.cpp
+        MainWindow.cpp \
+    WeatherImageObject.cpp \
+    WeatherManager.cpp
 
-HEADERS  += MainWindow.h
+HEADERS  += MainWindow.h \
+    WeatherImageObject.h \
+    WeatherManager.h
 
 FORMS    += MainWindow.ui
 

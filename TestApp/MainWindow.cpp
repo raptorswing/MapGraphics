@@ -9,10 +9,12 @@
 #include "guts/CompositeTileSourceConfigurationWidget.h"
 #include "CircleObject.h"
 #include "PolygonObject.h"
+#include "WeatherManager.h"
 
 #include <QSharedPointer>
 #include <QtDebug>
 #include <QThread>
+#include <QImage>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSharedPointer<OSMTileSource> aerialTiles(new OSMTileSource(OSMTileSource::MapQuestAerialTiles), &QObject::deleteLater);
     QSharedPointer<GridTileSource> gridTiles(new GridTileSource(), &QObject::deleteLater);
     QSharedPointer<CompositeTileSource> composite(new CompositeTileSource(), &QObject::deleteLater);
-    composite->addSourceBottom(osmTiles,0.75);
+    composite->addSourceBottom(osmTiles);
     composite->addSourceBottom(aerialTiles);
     composite->addSourceTop(gridTiles);
     view->setTileSource(composite);
@@ -46,13 +48,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->menuWindow->addAction(this->ui->dockWidget->toggleViewAction());
     this->ui->dockWidget->toggleViewAction()->setText("&Layers");
 
-    QPolygonF poly;
-    poly << QPointF(-111.658752,40.255456) << QPointF(-111.643386,40.256285) << QPointF(-111.645773,40.244085) << QPointF(-111.656187,40.244183);
-    PolygonObject * polyObj = new PolygonObject(poly, QColor(200,0,0,100));
-    scene->addObject(polyObj);
-
-    view->setZoomLevel(14);
+    view->setZoomLevel(4);
     view->centerOn(-111.658752, 40.255456);
+
+    WeatherManager * weatherMan = new WeatherManager(scene, this);
+    Q_UNUSED(weatherMan)
 }
 
 MainWindow::~MainWindow()
