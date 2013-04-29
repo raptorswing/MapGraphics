@@ -146,6 +146,9 @@ void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
 
 void PolygonObject::setFillColor(const QColor &color)
 {
+    if (_fillColor == color)
+        return;
+
     _fillColor = color;
     this->redrawRequested();
 }
