@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += network sql widgets
+QT       += network sql
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = MapGraphics
 TEMPLATE = lib
