@@ -69,11 +69,19 @@ void PrivateQGraphicsScene::handleSelectionChanged()
     foreach(QGraphicsItem * item, selectedList)
         selected.insert(item);
 
+    QList<QGraphicsItem *> newSelections;
     foreach(PrivateQGraphicsObject * obj, _mgToqg.values())
     {
         QGraphicsItem * casted = (QGraphicsItem *) obj;
-        obj->setSelected(selected.contains(casted));
+
+        bool doSelect = selected.contains(casted) && !_oldSelections.contains(obj);
+        obj->setSelected(doSelect);
+
+        if (doSelect)
+            newSelections.append(obj);
     }
+
+    _oldSelections = newSelections;
 
 }
 

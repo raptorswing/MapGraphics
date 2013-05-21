@@ -37,6 +37,8 @@ private:
     PrivateQGraphicsInfoSource * _infoSource;
 
     QHash<MapGraphicsObject *,PrivateQGraphicsObject *> _mgToqg;
+
+    QList<QGraphicsItem *> _oldSelections;
     
 };
 
