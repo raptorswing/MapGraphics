@@ -245,6 +245,8 @@ void PolygonObject::handleAddVertexCircleSelected()
     editCircle->setPos(geoPos);
     _editCircles.insert(index,editCircle);
 
+    editCircle->setSelected(true);
+
 
     //Create a new "Add vertex" circle and put it in the right spot
     CircleObject * addVertexCircle = this->constructAddVertexCircle();
@@ -345,6 +347,7 @@ CircleObject *PolygonObject::constructAddVertexCircle()
             SLOT(handleAddVertexCircleSelected()));
 
     this->newObjectGenerated(toRet);
+    toRet->setToolTip("Single-click (don't drag!) to add vertex.");
     return toRet;
 }
 
