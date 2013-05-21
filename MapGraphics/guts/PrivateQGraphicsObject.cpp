@@ -372,6 +372,12 @@ void PrivateQGraphicsObject::handleMGSelectedChanged()
 }
 
 //private slot
+void PrivateQGraphicsObject::handleMGToolTipChanged(const QString &toolTip)
+{
+    this->setToolTip(toolTip);
+}
+
+//private slot
 void PrivateQGraphicsObject::handleMGFlagsChanged()
 {
     MapGraphicsObject::MapGraphicsObjectFlags flags = _mgObj->flags();
@@ -461,6 +467,10 @@ void PrivateQGraphicsObject::setMGObj(MapGraphicsObject * mgObj)
             SIGNAL(selectedChanged()),
             this,
             SLOT(handleMGSelectedChanged()));
+    connect(_mgObj,
+            SIGNAL(toolTipChanged(QString)),
+            this,
+            SLOT(handleMGToolTipChanged(QString)));
     connect(_mgObj,
             SIGNAL(flagsChanged()),
             this,

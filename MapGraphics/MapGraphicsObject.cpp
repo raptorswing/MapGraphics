@@ -185,6 +185,17 @@ void MapGraphicsObject::setSelected(bool sel)
         QTimer::singleShot(1, this, SIGNAL(selectedChanged()));
 }
 
+QString MapGraphicsObject::toolTip() const
+{
+    return _toolTip;
+}
+
+void MapGraphicsObject::setToolTip(const QString &toolTip)
+{
+    _toolTip = toolTip;
+    this->toolTipChanged(toolTip);
+}
+
 void MapGraphicsObject::setFlag(MapGraphicsObject::MapGraphicsObjectFlag flag, bool enabled)
 {
     if (enabled)

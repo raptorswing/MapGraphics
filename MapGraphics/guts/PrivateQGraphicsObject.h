@@ -73,6 +73,7 @@ private slots:
     void handleVisibleChanged();
     void handleZValueChanged();
     void handleMGSelectedChanged();
+    void handleMGToolTipChanged(const QString& toolTip);
     void handleMGFlagsChanged();
     void updateAllFromMG();
 

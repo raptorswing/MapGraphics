@@ -93,6 +93,9 @@ public:
     bool isSelected() const;
     void setSelected(bool);
 
+    QString toolTip() const;
+    void setToolTip(const QString& toolTip);
+
     void setFlag(MapGraphicsObjectFlag, bool enabled=true);
     void setFlags(MapGraphicsObject::MapGraphicsObjectFlags);
     MapGraphicsObject::MapGraphicsObjectFlags flags() const;
@@ -117,6 +120,7 @@ signals:
     void rotationChanged();
     void visibleChanged();
     void zValueChanged();
+    void toolTipChanged(const QString& toolTip);
 
     void flagsChanged();
 
@@ -152,6 +156,8 @@ private:
     bool _visible;
     qreal _zValue;
     bool _selected;
+
+    QString _toolTip;
 
     MapGraphicsObject::MapGraphicsObjectFlags _flags;
 
