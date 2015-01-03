@@ -196,6 +196,23 @@ void OSMTileSource::handleNetworkRequestFinished()
         return;
     }
 
+    //Figure out how long the tile should be cached
+    QDateTime expireTime;
+    if (reply->hasRawHeader("Cache-Control"))
+    {
+        //We support the max-age directive only for now
+        const QByteArray cacheControl = reply->rawHeader("Cache-Control");
+        QRegExp maxAgeFinder("max-age=(\\d+)");
+        if (maxAgeFinder.indexIn(cacheControl) != -1)
+        {
+            bool ok = false;
+            const qint64 delta = maxAgeFinder.cap(1).toULongLong(&ok);
+
+            if (ok)
+                expireTime = QDateTime::currentDateTimeUtc().addSecs(delta);
+        }
+    }
+
     //Notify client of tile retrieval
-    this->prepareRetrievedTile(x,y,z,image);
+    this->prepareNewlyReceivedTile(x,y,z, image, expireTime);
 }

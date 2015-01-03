@@ -204,7 +204,7 @@ protected:
      * @param cacheID
      * @param toCache
      */
-    void toMemCache(const QString& cacheID, QImage * toCache,QDateTime *expireTime=0);
+    void toMemCache(const QString& cacheID, QImage * toCache, QDateTime &expireTime = QDateTime());
 
     /**
      * @brief Given a cacheID, retrieve the tile with that cacheID from the disk cache. Returns a
@@ -226,7 +226,7 @@ protected:
      * @param toCache
      * @param cacheUntil
      */
-    void toDiskCache(const QString& cacheID, QImage * toCache, QDateTime *expireTime=0);
+    void toDiskCache(const QString& cacheID, QImage * toCache, QDateTime &expireTime = QDateTime());
 
     /**
      * @brief Fetches (from MapQuest or OSM or whatever) or generates the tile if it isn't cached.
@@ -242,9 +242,31 @@ protected:
                            quint32 y,
                            quint8 z)=0;
 
-    void prepareRetrievedTile(quint32 x, quint32 y, quint8 z, QImage * image);
+    //Call only for tiles which were newly-generated or newly-acquired from the network (i.e., not cached)
+    void prepareNewlyReceivedTile(quint32 x, quint32 y, quint8 z, QImage * image, QDateTime expireTime = QDateTime());
+
+    /**
+     * @brief Returns the time when the tile is supposed to expire from any caches.
+     * This should only be called on tiles which are actually cached!
+     * @param cacheID The cacheID of the tile
+     * @return QDateTime of the tile's expiration (time after which it should be re-requested or regenerated)
+     */
+    QDateTime getTileExpirationTime(const QString& cacheID);
+
+    /**
+     * @brief Sets the time when the tile is supposed to expire from any caches
+     * @param cacheID of the tile
+     * @param QDateTime of the tile's expiration (time after which it should be re-requested or regenerated)
+     */
+    void setTileExpirationTime(const QString& cacheID, QDateTime expireTime);
 
 private:
+    /**
+     * @brief prepareRetrievedTile prepares a generated/retrieve tile for retrieval by the client
+     * and notifies the client that the tile is ready.
+     */
+    void prepareRetrievedTile(quint32 x, quint32 y, quint8 z, QImage * image);
+
     /**
      * @brief Given the x,y, and z of a tile, returns the directory where it should be cached on disk
      *
@@ -268,7 +290,6 @@ private:
 
     /*!
      \brief Loads cache expiration times from disk if necessary
-
     */
     void loadCacheExpirationsFromDisk();
 

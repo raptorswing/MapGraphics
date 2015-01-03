@@ -39,7 +39,7 @@ MapTileSource::~MapTileSource()
 
 void MapTileSource::requestTile(quint32 x, quint32 y, quint8 z)
 {
-    /*We emit a signal to communicate across threads. MapTileSource runs in its own
+    /*We emit a signal to communicate across threads. MapTileSource (usually) runs in its own
       thread, but this method will be called from a different thread (probably the GUI thread).
       It's easy to communicate across threads with queued signals/slots.
     */
@@ -130,15 +130,27 @@ QImage *MapTileSource::fromMemCache(const QString &cacheID)
 {
     QImage * toRet = 0;
 
-    //If it's cached, make a copy and return a pointer to the copy
-    QImage * inCache = _memoryCache.object(cacheID);
-    if (inCache)
-        toRet = new QImage(*inCache);
+    if (_memoryCache.contains(cacheID))
+    {
+        //Figure out when the tile we're loading from cache was supposed to expire
+        QDateTime expireTime = this->getTileExpirationTime(cacheID);
+
+        //If the cached tile is older than we would like, throw it out
+        if (QDateTime::currentDateTimeUtc().secsTo(expireTime) <= 0)
+        {
+            _memoryCache.remove(cacheID);
+        }
+        //Otherwise, make a copy of the cached tile and return it to the caller
+        else
+        {
+            toRet = new QImage(*_memoryCache.object(cacheID));
+        }
+    }
 
     return toRet;
 }
 
-void MapTileSource::toMemCache(const QString &cacheID, QImage *toCache, QDateTime * expireTime)
+void MapTileSource::toMemCache(const QString &cacheID, QImage *toCache, QDateTime &expireTime)
 {
     if (toCache == 0)
         return;
@@ -146,21 +158,12 @@ void MapTileSource::toMemCache(const QString &cacheID, QImage *toCache, QDateTim
     if (_memoryCache.contains(cacheID))
         return;
 
-    //If we got a non-null expire time, use that, otherwise generate the default but be sure to delete it
-    bool mustDeleteExpireTime = false;
-    if (expireTime == 0)
-    {
-        mustDeleteExpireTime = true;
-        expireTime = new QDateTime(QDateTime::currentDateTime());
-        expireTime->addDays(DEFAULT_CACHE_DAYS);
-    }
+    //Note when the tile will expire
+    this->setTileExpirationTime(cacheID, expireTime);
 
     //Make a copy of the QImage
     QImage * copy = new QImage(*toCache);
     _memoryCache.insert(cacheID,copy);
-
-    if (mustDeleteExpireTime)
-        delete expireTime;
 }
 
 QImage *MapTileSource::fromDiskCache(const QString &cacheID)
@@ -170,30 +173,17 @@ QImage *MapTileSource::fromDiskCache(const QString &cacheID)
     if (!MapTileSource::cacheID2xyz(cacheID,&x,&y,&z))
         return 0;
 
-
     //See if we've got it in the cache
     const QString path = this->getDiskCacheFile(x,y,z);
     QFile fp(path);
     if (!fp.exists())
         return 0;
 
-    //Make sure we've got our expiration database loaded
-    this->loadCacheExpirationsFromDisk();
-
     //Figure out when the tile we're loading from cache was supposed to expire
-    QDateTime expireTime;
-    if (_cacheExpirations.contains(cacheID))
-        expireTime = _cacheExpirations.value(cacheID);
-    else
-    {
-        qWarning() << "Tile" << cacheID << "has unknown expire time. Resetting to default of" << DEFAULT_CACHE_DAYS << "days.";
-        expireTime = QDateTime::currentDateTime();
-        expireTime = expireTime.addDays(DEFAULT_CACHE_DAYS);
-        _cacheExpirations.insert(cacheID,expireTime);
-    }
+    QDateTime expireTime = this->getTileExpirationTime(cacheID);
 
     //If the cached tile is older than we would like, throw it out
-    if (QDateTime::currentDateTime().secsTo(expireTime) <= 0)
+    if (QDateTime::currentDateTimeUtc().secsTo(expireTime) <= 0)
     {
         if (!QFile::remove(path))
             qWarning() << "Failed to remove old cache file" << path;
@@ -228,7 +218,7 @@ QImage *MapTileSource::fromDiskCache(const QString &cacheID)
     return image;
 }
 
-void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTime *expireTime)
+void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTime& expireTime)
 {
     //Figure out x,y,z based on the cacheID
     quint32 x,y,z;
@@ -243,15 +233,8 @@ void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTi
     if (fp.exists())
         return;
 
-    //If they told us when the tile expires, store that expiration. Otherwise, use the default.
-    bool mustDeleteExpireTime = false;
-    if (expireTime == 0)
-    {
-        mustDeleteExpireTime = true;
-        expireTime = new QDateTime(QDateTime::currentDateTime());
-        *expireTime = expireTime->addDays(DEFAULT_CACHE_DAYS);
-    }
-    _cacheExpirations.insert(cacheID,*expireTime);
+    //Note when the tile will expire
+    this->setTileExpirationTime(cacheID, expireTime);
 
     //Auto-detect file format
     const char * format = 0;
@@ -262,10 +245,6 @@ void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTi
     //Try to write the data
     if (!toCache->save(filePath,format,quality))
         qWarning() << "Failed to put" << this->name() << x << y << z << "into disk cache";
-
-    //Clean up the expire time if we have responsibility for it.
-    if (mustDeleteExpireTime)
-        delete expireTime;
 }
 
 void MapTileSource::prepareRetrievedTile(quint32 x, quint32 y, quint8 z, QImage *image)
@@ -274,26 +253,67 @@ void MapTileSource::prepareRetrievedTile(quint32 x, quint32 y, quint8 z, QImage 
     if (image == 0)
         return;
 
-    //Insert into caches when applicable
-    const QString cacheID = MapTileSource::createCacheID(x,y,z);
-    if (this->cacheMode() == DiskAndMemCaching)
-    {
-        this->toMemCache(cacheID,image);
-        this->toDiskCache(cacheID,image);
-    }
-
     //Put it into the "temporary retrieval cache" so the user can grab it
     QMutexLocker lock(&_tempCacheLock);
     _tempCache.insert(MapTileSource::createCacheID(x,y,z),
                       image);
     /*
       We must explicitly unlock the mutex before emitting tileRetrieved in case
-      we're running in the GUI thread.
+      we're running in the GUI thread (since the signal can trigger
+      slots immediately in that case).
     */
     lock.unlock();
 
     //Emit signal so user knows to call getFinishedTile()
     this->tileRetrieved(x,y,z);
+}
+
+void MapTileSource::prepareNewlyReceivedTile(quint32 x, quint32 y, quint8 z, QImage *image, QDateTime expireTime)
+{
+    //Insert into caches when applicable
+    const QString cacheID = MapTileSource::createCacheID(x,y,z);
+    if (this->cacheMode() == DiskAndMemCaching)
+    {
+        this->toMemCache(cacheID, image, expireTime);
+        this->toDiskCache(cacheID, image, expireTime);
+    }
+
+    //Put the tile in a client-accessible place and notify them
+    this->prepareRetrievedTile(x, y, z, image);
+}
+
+//protected
+QDateTime MapTileSource::getTileExpirationTime(const QString &cacheID)
+{
+    //Make sure we've got our expiration database loaded
+    this->loadCacheExpirationsFromDisk();
+
+    QDateTime expireTime;
+    if (_cacheExpirations.contains(cacheID))
+        expireTime = _cacheExpirations.value(cacheID);
+    else
+    {
+        qWarning() << "Tile" << cacheID << "has unknown expire time. Resetting to default of" << DEFAULT_CACHE_DAYS << "days.";
+        expireTime = QDateTime::currentDateTimeUtc().addDays(DEFAULT_CACHE_DAYS);
+        _cacheExpirations.insert(cacheID,expireTime);
+    }
+
+    return expireTime;
+}
+
+//protected
+void MapTileSource::setTileExpirationTime(const QString &cacheID, QDateTime expireTime)
+{
+    //Make sure we've got our expiration database loaded
+    this->loadCacheExpirationsFromDisk();
+
+    //If they told us when the tile expires, store that expiration. Otherwise, use the default.
+    if (expireTime.isNull())
+    {
+        expireTime = QDateTime::currentDateTimeUtc().addDays(DEFAULT_CACHE_DAYS);
+    }
+
+    _cacheExpirations.insert(cacheID, expireTime);
 }
 
 //private

@@ -290,7 +290,7 @@ void CompositeTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
                          QString("Composite Source Empty"),
                          QTextOption(Qt::AlignCenter));
         painter.end();
-        this->prepareRetrievedTile(x,y,z,toRet);
+        this->prepareNewlyReceivedTile(x,y,z,toRet);
         return;
     }
 
@@ -409,7 +409,7 @@ void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
     _pendingTiles.remove(cacheID);
     painter.end();
 
-    this->prepareRetrievedTile(x,y,z,toRet);
+    this->prepareNewlyReceivedTile(x,y,z,toRet);
 }
 
 //private slot

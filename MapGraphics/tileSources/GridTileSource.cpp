@@ -119,8 +119,7 @@ void GridTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
                          qgsScenePos.y() - topScenePixel);
     }
 
-
     painter.end();
 
-    this->prepareRetrievedTile(x,y,z,toRet);
+    this->prepareNewlyReceivedTile(x,y,z,toRet);
 }
