@@ -12,6 +12,8 @@ TEMPLATE = lib
 
 DEFINES += MAPGRAPHICS_LIBRARY
 
+INCLUDEPATH += .
+
 SOURCES += MapGraphicsScene.cpp \
     MapGraphicsObject.cpp \
     MapGraphicsView.cpp \
