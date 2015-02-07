@@ -219,8 +219,8 @@ protected:
     /**
      * @brief Given a cacheID and a pointer to a QImage, inserts the QImage pointed to by the pointer into
      * the disk cache using cacheID as the key.
-     * Optionally, takes a pointer to a QDateTime object that specifies the time that the QImage should be
-     * kept cached until. Defaults to 7 days. You are responsbile for deleting the QDateTime that's passed in
+     * Optionally, takes a QDateTime object that specifies the time that the QImage should be kept cached 
+     * until. Defaults to 7 days.
      *
      * @param cacheID
      * @param toCache
