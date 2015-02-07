@@ -150,7 +150,7 @@ QImage *MapTileSource::fromMemCache(const QString &cacheID)
     return toRet;
 }
 
-void MapTileSource::toMemCache(const QString &cacheID, QImage *toCache, QDateTime &expireTime)
+void MapTileSource::toMemCache(const QString &cacheID, QImage *toCache, const QDateTime &expireTime)
 {
     if (toCache == 0)
         return;
@@ -218,7 +218,7 @@ QImage *MapTileSource::fromDiskCache(const QString &cacheID)
     return image;
 }
 
-void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, QDateTime& expireTime)
+void MapTileSource::toDiskCache(const QString &cacheID, QImage *toCache, const QDateTime &expireTime)
 {
     //Figure out x,y,z based on the cacheID
     quint32 x,y,z;

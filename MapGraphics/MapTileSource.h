@@ -204,7 +204,7 @@ protected:
      * @param cacheID
      * @param toCache
      */
-    void toMemCache(const QString& cacheID, QImage * toCache, QDateTime &expireTime = QDateTime());
+    void toMemCache(const QString& cacheID, QImage * toCache, const QDateTime &expireTime = QDateTime());
 
     /**
      * @brief Given a cacheID, retrieve the tile with that cacheID from the disk cache. Returns a
@@ -226,7 +226,7 @@ protected:
      * @param toCache
      * @param cacheUntil
      */
-    void toDiskCache(const QString& cacheID, QImage * toCache, QDateTime &expireTime = QDateTime());
+    void toDiskCache(const QString& cacheID, QImage * toCache, const QDateTime &expireTime = QDateTime());
 
     /**
      * @brief Fetches (from MapQuest or OSM or whatever) or generates the tile if it isn't cached.
