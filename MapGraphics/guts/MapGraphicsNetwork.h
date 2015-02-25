@@ -1,6 +1,7 @@
 #ifndef MAPGRAPHICSNETWORK_H
 #define MAPGRAPHICSNETWORK_H
 
+#include <QMutex>
 #include <QNetworkAccessManager>
 #include <QHash>
 
@@ -21,6 +22,7 @@ protected:
 
 private:
     static QHash<QThread *, MapGraphicsNetwork *> _instances;
+    static QMutex _mutex;
     QNetworkAccessManager * _manager;
 
     QByteArray _userAgent;

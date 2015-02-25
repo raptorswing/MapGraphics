@@ -1,5 +1,6 @@
 #include "MapGraphicsNetwork.h"
 
+#include <QMutexLocker>
 #include <QNetworkRequest>
 #include <QThread>
 #include <QtDebug>
@@ -8,11 +9,12 @@ const QByteArray DEFAULT_USER_AGENT = "MapGraphics";
 
 //static
 QHash<QThread *, MapGraphicsNetwork *> MapGraphicsNetwork::_instances = QHash<QThread *, MapGraphicsNetwork*>();
+QMutex MapGraphicsNetwork::_mutex;
 
 //static
 MapGraphicsNetwork *MapGraphicsNetwork::getInstance()
 {
-
+    QMutexLocker lock(&_mutex);
     QThread * current = QThread::currentThread();
     if (!MapGraphicsNetwork::_instances.contains(current))
         MapGraphicsNetwork::_instances.insert(current, new MapGraphicsNetwork());
