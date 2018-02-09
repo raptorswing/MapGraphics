@@ -8,7 +8,7 @@
 
 #include "guts/Conversions.h"
 
-const QUrl SHORT_RANGE_REFLECTIVITY_DIR = QUrl("http://radar.weather.gov/ridge/RadarImg/N0R/");
+const QUrl SHORT_RANGE_REFLECTIVITY_DIR = QUrl("https://radar.weather.gov/ridge/RadarImg/N0R/");
 const QString WORLD_FILE_REGEX_STRING = "<a href=\"([A-Z]{3}_[^\"]*.gfw)\">";
 const int updateIntervalMS = 5 * 60 * 1000; //Every five minutes
 
@@ -66,7 +66,7 @@ void WeatherManager::handleRequestFinished(QNetworkReply *reply)
     }
     else
     {
-        qWarning() << this << "received unkown reply";
+        qWarning() << this << "received unknown reply";
         reply->deleteLater();
     }
 }
