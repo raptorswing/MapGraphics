@@ -98,7 +98,7 @@ void OSMTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
     //Figure out which server to request from based on our desired tile type
     if (_tileType == OSMTiles)
     {
-        host = "http://b.tile.openstreetmap.org";
+        host = "https://b.tile.openstreetmap.org";
         url = "/%1/%2/%3.png";
     }
 
