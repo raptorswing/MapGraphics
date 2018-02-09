@@ -73,14 +73,6 @@ QString OSMTileSource::name() const
         return "OpenStreetMap Tiles";
         break;
 
-    case MapQuestOSMTiles:
-        return "MapQuestOSM Tiles";
-        break;
-
-    case MapQuestAerialTiles:
-        return "MapQuest Aerial Tiles";
-        break;
-
     default:
         return "Unknown Tiles";
         break;
@@ -89,7 +81,7 @@ QString OSMTileSource::name() const
 
 QString OSMTileSource::tileFileExtension() const
 {
-    if (_tileType == OSMTiles || _tileType == MapQuestOSMTiles)
+    if (_tileType == OSMTiles)
         return "png";
     else
         return "jpg";
@@ -109,17 +101,6 @@ void OSMTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
         host = "http://b.tile.openstreetmap.org";
         url = "/%1/%2/%3.png";
     }
-    else if (_tileType == MapQuestOSMTiles)
-    {
-        host = "http://otile1.mqcdn.com";
-        url = "/tiles/1.0.0/osm/%1/%2/%3.jpg";
-    }
-    else
-    {
-        host = "http://otile1.mqcdn.com";
-        url = "/tiles/1.0.0/sat/%1/%2/%3.jpg";
-    }
-
 
     //Use the unique cacheID to see if this tile has already been requested
     const QString cacheID = this->createCacheID(x,y,z);

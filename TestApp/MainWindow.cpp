@@ -31,11 +31,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Setup some tile sources
     QSharedPointer<OSMTileSource> osmTiles(new OSMTileSource(OSMTileSource::OSMTiles), &QObject::deleteLater);
-    QSharedPointer<OSMTileSource> aerialTiles(new OSMTileSource(OSMTileSource::MapQuestAerialTiles), &QObject::deleteLater);
     QSharedPointer<GridTileSource> gridTiles(new GridTileSource(), &QObject::deleteLater);
     QSharedPointer<CompositeTileSource> composite(new CompositeTileSource(), &QObject::deleteLater);
     composite->addSourceBottom(osmTiles);
-    composite->addSourceBottom(aerialTiles);
     composite->addSourceTop(gridTiles);
     view->setTileSource(composite);
 

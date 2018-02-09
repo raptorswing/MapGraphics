@@ -15,9 +15,7 @@ class MAPGRAPHICSSHARED_EXPORT OSMTileSource : public MapTileSource
 public:
     enum OSMTileType
     {
-        OSMTiles,
-        MapQuestOSMTiles,
-        MapQuestAerialTiles
+        OSMTiles
     };
 
 public:
