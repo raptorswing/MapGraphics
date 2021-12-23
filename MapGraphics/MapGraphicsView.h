@@ -71,6 +71,8 @@ public:
 
     void zoomIn(ZoomMode zMode = CenterZoom);
     void zoomOut(ZoomMode zMode = CenterZoom);
+
+    void rotate(qreal rotation);
     
 signals:
     void zoomLevelChanged(quint8 nZoom);

@@ -312,6 +312,11 @@ void MapGraphicsView::zoomOut(ZoomMode zMode)
         this->setZoomLevel(this->zoomLevel()-1,zMode);
 }
 
+void MapGraphicsView::rotate(qreal rotation)
+{
+    _childView->rotate(rotation);
+}
+
 //protected slot
 void MapGraphicsView::handleChildMouseDoubleClick(QMouseEvent *event)
 {
