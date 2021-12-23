@@ -9,7 +9,6 @@
 #include "guts/CompositeTileSourceConfigurationWidget.h"
 #include "CircleObject.h"
 #include "PolygonObject.h"
-#include "WeatherManager.h"
 
 #include <QSharedPointer>
 #include <QtDebug>
@@ -46,11 +45,15 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->menuWindow->addAction(this->ui->dockWidget->toggleViewAction());
     this->ui->dockWidget->toggleViewAction()->setText("&Layers");
 
-    view->setZoomLevel(4);
-    view->centerOn(-111.658752, 40.255456);
+    view->setZoomLevel(12);
+    view->centerOn(-112.202442, 40.9936234);
 
-    WeatherManager * weatherMan = new WeatherManager(scene, this);
-    Q_UNUSED(weatherMan)
+    // Create a circle on the map to demonstrate MapGraphicsObject a bit
+    // The circle can be clicked/dragged around and should be ~5km in radius
+    MapGraphicsObject * circle = new CircleObject(5000, false, QColor(255, 0, 0, 100));
+    circle->setLatitude(40.9936234);
+    circle->setLongitude(-112.202442);
+    scene->addObject(circle);
 }
 
 MainWindow::~MainWindow()

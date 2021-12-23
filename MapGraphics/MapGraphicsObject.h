@@ -8,6 +8,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QGraphicsItem>
+#include <QString>
 
 #include "MapGraphics_global.h"
 
