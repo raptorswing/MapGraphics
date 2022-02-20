@@ -350,6 +350,34 @@ void MapGraphicsView::handleChildViewContextMenu(QContextMenuEvent *event)
 //protected slot
 void MapGraphicsView::handleChildViewScrollWheel(QWheelEvent *event)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    QPoint pixelDelta = event->pixelDelta();
+    qDebug()<<"MapGraphicsView::handleChildViewScrollWheel: pixelDelta"<<pixelDelta;
+    QPoint angleDelta = event->angleDelta();
+    qDebug()<<"MapGraphicsView::handleChildViewScrollWheel: angleDelta"<<angleDelta;
+
+    event->setAccepted(true);
+    this->setDragMode(MapGraphicsView::ScrollHandDrag);
+
+
+    if (!pixelDelta.isNull()) {
+        //scrollWithPixels(numPixels);
+        if (pixelDelta.manhattanLength()>0) {
+            this->zoomIn(MouseZoom);
+        } else {
+            this->zoomOut(MouseZoom);
+        }
+
+    } else if (!angleDelta.isNull()) {
+        QPoint angleDeltaDegree = angleDelta / 120;
+        //scrollWithDegrees(numSteps);
+        if (angleDeltaDegree.y()>0) {
+            this->zoomIn(MouseZoom);
+        } else {
+            this->zoomOut(MouseZoom);
+        }
+    }
+#else
     event->setAccepted(true);
 
     this->setDragMode(MapGraphicsView::ScrollHandDrag);
@@ -357,6 +385,8 @@ void MapGraphicsView::handleChildViewScrollWheel(QWheelEvent *event)
         this->zoomIn(MouseZoom);
     else
         this->zoomOut(MouseZoom);
+#endif
+
 }
 
 //private slot
@@ -399,7 +429,7 @@ void MapGraphicsView::doTileLayout()
     //We'll mark tiles that aren't being displayed as free so we can use them
     QQueue<MapTileGraphicsObject *> freeTiles;
 
-    QSet<QPointF> placesWhereTilesAre;
+    QSet<QString> placesWhereTilesAre;
     foreach(MapTileGraphicsObject * tileObject, _tileObjects)
     {
         if (!tileObject->isVisible() || !exaggeratedBoundingRect.contains(tileObject->pos()))
@@ -407,8 +437,10 @@ void MapGraphicsView::doTileLayout()
             freeTiles.enqueue(tileObject);
             tileObject->setVisible(false);
         }
-        else
-            placesWhereTilesAre.insert(tileObject->pos());
+        else{
+            QString pointKey = QString::number(tileObject->pos().x()) % "," % QString::number(tileObject->pos().y());
+            placesWhereTilesAre.insert(pointKey);
+        }
     }
 
     const quint16 tileSize = _tileSource->tileSize();
@@ -435,7 +467,8 @@ void MapGraphicsView::doTileLayout()
 
 
             bool tileIsThere = false;
-            if (placesWhereTilesAre.contains(scenePos))
+            QString pointKey = QString::number(scenePos.x()) % "," % QString::number(scenePos.y());
+            if (placesWhereTilesAre.contains(pointKey))
                 tileIsThere = true;
 
             if (tileIsThere)

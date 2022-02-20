@@ -7,6 +7,9 @@
 #include <QStringBuilder>
 #include <QtDebug>
 #include <QNetworkReply>
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    #include <QtCore5Compat/QRegExp>
+#endif
 
 const qreal PI = 3.14159265358979323846;
 const qreal deg2rad = PI / 180.0;

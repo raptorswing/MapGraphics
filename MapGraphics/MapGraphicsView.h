@@ -106,11 +106,12 @@ private:
 
     DragMode _dragMode;
 };
-
+/*
 inline uint qHash(const QPointF& key)
 {
     const QString temp = QString::number(key.x()) % "," % QString::number(key.y());
     return qHash(temp);
 }
+*/
 
 #endif // MAPGRAPHICSVIEW_H
