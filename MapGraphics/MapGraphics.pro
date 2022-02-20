@@ -7,6 +7,8 @@
 QT       += network sql
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
+
 TARGET = MapGraphics
 TEMPLATE = lib
 
@@ -69,17 +71,100 @@ symbian {
     DEPLOYMENT += addFiles
 }
 
-unix:!symbian {
-    maemo5 {
-        target.path = /opt/usr/lib
-    } else {
-        target.path = /usr/lib
-    }
-    INSTALLS += target
-}
+#unix:!symbian {
+#    maemo5 {
+#        target.path = /opt/usr/lib
+#    } else {
+#        target.path = /usr/lib
+#    }
+#    INSTALLS += target
+#}
 
 FORMS += \
     guts/CompositeTileSourceConfigurationWidget.ui
 
 RESOURCES += \
     resources.qrc
+
+# BUILD OUTPUT DIR outside of parent MapGraphics
+# MapGraphics_BUILD at the same dir level of MapGraphics
+message( 'Building BUILD_OUT_DIR= $${OUT_PWD} ' )
+
+
+message( 'Building QMAKESPEC= $${QMAKESPEC} ' )
+#-------------------------------------------------
+# WIN32
+#-------------------------------------------------
+win32{
+    message( 'Building TARGET win32 WINDOWS_TARGET_PLATFORM_VERSION= $${WINDOWS_TARGET_PLATFORM_VERSION}' )
+    CONFIG(release, debug|release){
+        message( 'Building TARGET win32 release' )
+        target.path = $$PWD/../../MapGraphics_BUILD/LIB_BINARY/MSVC2019_64bit-Release
+        DESTDIR = $${target.path}
+    }
+    CONFIG(debug, debug|release){
+        message( 'Building TARGET win32 debug' )
+
+    }
+}
+
+
+#-------------------------------------------------
+# ANDROID
+#-------------------------------------------------
+android {
+    message('Building android')
+    message('Building android ANDROID_TARGET_ARCH $${ANDROID_TARGET_ARCH}')
+
+    contains(ANDROID_TARGET_ARCH,x86_64) {
+        message('Building android for x86_64')
+        #ANDROID_EXTRA_LIBS =
+        # message('Building ANDROID_TARGET_ARCH x86_64  ANDROID_EXTRA_LIBS=$${ANDROID_EXTRA_LIBS}')
+        #LIBS += -L$$PWD/ -l
+        #INCLUDEPATH += $$PWD/.....
+        #DEPENDPATH += $$PWD/......
+
+        #top_builddir=$$shadowed($$PWD)
+        #DESTDIR = $$top_builddir/plugins/myplugin
+        #DESTDIR = ../TestApp
+        target.path = $$PWD/../../MapGraphics_BUILD/LIB_BINARY/Clang_x86_64-Release
+        DESTDIR = $${target.path}
+        #INSTALLS += target
+        message( 'Building android INSTALLS= $${target.path} ' )
+    }
+
+    contains(ANDROID_TARGET_ARCH,arm64-v8a) {
+        message( 'Building android for arm64-v8a' )
+        #ANDROID_EXTRA_LIBS =
+        # message('Building ANDROID_TARGET_ARCH x86_64  ANDROID_EXTRA_LIBS=$${ANDROID_EXTRA_LIBS}')
+        #LIBS += -L$$PWD/ -l
+        #INCLUDEPATH += $$PWD/.....
+        #DEPENDPATH += $$PWD/......
+        #top_builddir=$$shadowed($$PWD)
+        #DESTDIR = $$top_builddir/plugins/myplugin
+        #DESTDIR = ../TestApp
+        target.path = $$PWD/../../MapGraphics_BUILD/LIB_BINARY/Clang_arm64-v8a-Release
+        DESTDIR = $${target.path}
+        #INSTALLS += target
+        message( 'Building android INSTALLS= $${target.path} ' )
+    }
+
+    android: include(C:/TOOLS/ANDROID/android_openssl/openssl.pri)
+}
+
+#-------------------------------------------------
+# iOs Configuration
+#-------------------------------------------------
+ios {
+    message( 'Building ios : QMAKE_TARGET= $${QMAKE_TARGET} QMAKE_MACOSX_DEPLOYMENT_TARGET= $${QMAKE_MACOSX_DEPLOYMENT_TARGET}' )
+     # iOs simulator
+    #target.path = $$PWD/../../MapGraphics_BUILD/LIB_BINARY/iOS_Simulator-Release
+    #DESTDIR = $${target.path}
+    #message( 'Building ios simulator' )
+
+    # iOs phone
+    target.path = $$PWD/../../MapGraphics_BUILD/LIB_BINARY/iOS-Release
+    DESTDIR = $${target.path}
+    message( 'Building ios phone' )
+
+}
