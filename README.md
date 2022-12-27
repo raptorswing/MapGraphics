@@ -9,6 +9,14 @@ If you're using QtCreator, just open the .pro file and build it. If you're on a 
 
 If you're using Visual Studio or Eclipse or some other C++ IDE, google around for instructions on building Qt projects with your IDE.
 
+If you're using CMake, execute the following commands (under Linux) :
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
 ## Examples
 
 The included test app provides a simple test/example application that shows a map with tiles loaded dynamically from OpenStreetMap
